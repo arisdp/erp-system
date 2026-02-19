@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Master\CompanyController;
+
+
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,4 +21,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+Route::resource('companies', CompanyController::class);
+
+require __DIR__ . '/auth.php';
