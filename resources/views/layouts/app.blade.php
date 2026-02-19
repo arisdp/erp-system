@@ -66,6 +66,36 @@
         });
     </script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Global Loader -->
+    <div id="globalLoader"
+        style="display:none;
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:rgba(255,255,255,0.6);
+            z-index:9999;
+            text-align:center;
+            padding-top:20%;">
+        <div class="spinner-border text-primary"
+            style="width:3rem;height:3rem;"></div>
+    </div>
+
+    <script>
+        // GLOBAL AJAX LOADER
+        $(document).ajaxStart(function() {
+            $('#globalLoader').show();
+        });
+
+        $(document).ajaxStop(function() {
+            $('#globalLoader').hide();
+        });
+    </script>
+
     @stack('scripts')
 
 </body>

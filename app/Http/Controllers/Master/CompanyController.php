@@ -13,38 +13,43 @@ class CompanyController extends Controller
     {
         if ($request->ajax()) {
 
-            $data = Company::query();
+            $companies = Company::select('id', 'code', 'name', 'email');
 
-            return DataTables::of($data)
+            return DataTables::of($companies)
                 ->addColumn('action', function ($row) {
                     return '
-                    <button onclick="editCompany(' . $row->id . ')" 
-                        class="btn btn-sm btn-warning">Edit</button>
-                ';
+                        <button class="btn btn-sm btn-warning btn-edit"
+                            data-id="' . $row->id . '">
+                            <i class="fas fa-edit"></i>
+                        </button>
+
+                        <button class="btn btn-sm btn-danger btn-delete"
+                            data-id="' . $row->id . '">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ';
                 })
+                ->rawColumns(['action'])
                 ->make(true);
         }
 
         return view('master.companies.index');
     }
 
-    public function create()
-    {
-        return view('master.companies.create');
-    }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'code' => 'required|unique:companies',
             'name' => 'required',
             'email' => 'required|email'
         ]);
 
-        $company = Company::create($request->all());
+        $company = Company::create($validated);
 
         return response()->json([
-            'success' => true,
+            'status' => 'success',
+            'message' => 'Company created successfully',
             'data' => $company
         ]);
     }
@@ -52,27 +57,34 @@ class CompanyController extends Controller
 
     public function edit(Company $company)
     {
-        return view('master.companies.edit', compact('company'));
+        return response()->json($company);
     }
+
 
     public function update(Request $request, Company $company)
     {
-        $request->validate([
+        $validated = $request->validate([
             'code' => 'required|unique:companies,code,' . $company->id,
             'name' => 'required',
+            'email' => 'required|email'
         ]);
 
-        $company->update($request->all());
+        $company->update($validated);
 
-        return redirect()->route('companies.index')
-            ->with('success', 'Company updated');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Company updated successfully'
+        ]);
     }
+
 
     public function destroy(Company $company)
     {
         $company->delete();
 
-        return redirect()->route('companies.index')
-            ->with('success', 'Company deleted');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Company deleted successfully'
+        ]);
     }
 }
