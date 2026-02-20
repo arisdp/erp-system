@@ -12,10 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('journal_entries', function (Blueprint $table) {
-            $table->id();
 
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id');
+            $table->primary('id');
+
+            $table->uuid('company_id');
+            $table->uuid('fiscal_year_id');
 
             $table->string('journal_number')->unique();
             $table->date('journal_date');
@@ -23,18 +25,41 @@ return new class extends Migration
             $table->text('description')->nullable();
 
             $table->string('reference_type')->nullable();
-            $table->unsignedBigInteger('reference_id')->nullable();
+            $table->uuid('reference_id')->nullable(); // 🔥 ganti ke uuid
 
             $table->string('status')->default('draft');
             // draft, posted, cancelled
 
-            $table->foreignId('created_by')->nullable()->constrained('users');
-            $table->foreignId('posted_by')->nullable()->constrained('users');
+            // 🔥 UUID USER REFERENCES
+            $table->uuid('created_by')->nullable();
+            $table->uuid('posted_by')->nullable();
 
             $table->timestamp('posted_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
+
+            // ===== FOREIGN KEYS =====
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
+
+            $table->foreign('fiscal_year_id')
+                ->references('id')
+                ->on('fiscal_years')
+                ->cascadeOnDelete();
+
+            $table->foreign('created_by')
+                ->references('id')
+                ->on('users')
+                ->nullOnDelete();
+
+            $table->foreign('posted_by')
+                ->references('id')
+                ->on('users')
+                ->nullOnDelete();
 
             $table->index(['company_id', 'journal_date']);
         });

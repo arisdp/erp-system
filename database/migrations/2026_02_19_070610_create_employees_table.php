@@ -12,12 +12,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('department_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->uuid('company_id')->nullable();
+            $table->uuid('branch_id')->nullable();
+            $table->uuid('department_id')->nullable();
+            $table->uuid('user_id')->nullable();
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
+
+            $table->foreign('branch_id')
+                ->references('id')
+                ->on('branches')
+                ->cascadeOnDelete();
+
+            $table->foreign('department_id')
+                ->references('id')
+                ->on('departments')
+                ->cascadeOnDelete();
+
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->cascadeOnDelete();
 
             $table->string('employee_code');
             $table->string('full_name');

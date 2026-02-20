@@ -12,13 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('permissions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('module_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+
+            $table->uuid('module_id');
+
+            $table->foreign('module_id')
+                ->references('id')
+                ->on('modules')
+                ->cascadeOnDelete();
 
             $table->string('name');
             $table->string('guard_name')->default('web');
 
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['module_id', 'name']);
         });

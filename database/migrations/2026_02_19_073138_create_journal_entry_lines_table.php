@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('journal_entry_lines', function (Blueprint $table) {
-            $table->id();
 
-            $table->foreignId('journal_entry_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('account_id')
-                ->constrained('chart_of_accounts')
-                ->restrictOnDelete();
+            $table->uuid('id');
+            $table->primary('id');
+
+            $table->uuid('journal_entry_id');
+            $table->uuid('account_id');
 
             $table->decimal('debit', 18, 2)->default(0);
             $table->decimal('credit', 18, 2)->default(0);
@@ -25,6 +25,18 @@ return new class extends Migration
             $table->text('description')->nullable();
 
             $table->timestamps();
+
+            // ===== FOREIGN KEYS =====
+
+            $table->foreign('journal_entry_id')
+                ->references('id')
+                ->on('journal_entries')
+                ->cascadeOnDelete();
+
+            $table->foreign('account_id')
+                ->references('id')
+                ->on('chart_of_accounts')
+                ->restrictOnDelete();
 
             $table->index(['account_id']);
         });

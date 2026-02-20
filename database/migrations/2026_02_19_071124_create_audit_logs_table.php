@@ -12,10 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('audit_logs', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
-            $table->foreignId('company_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->uuid('user_id');
+            $table->uuid('company_id');
+
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->cascadeOnDelete();
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
 
             $table->string('event'); // created, updated, deleted
             $table->string('auditable_type');
@@ -28,6 +38,7 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['auditable_type', 'auditable_id']);
             $table->index('company_id');

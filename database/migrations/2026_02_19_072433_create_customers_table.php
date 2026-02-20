@@ -12,11 +12,28 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('customers', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('payment_term_id')->nullable()->constrained();
-            $table->foreignId('currency_id')->nullable()->constrained();
+            $table->uuid('company_id');
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
+
+            $table->uuid('payment_term_id')->nullable();
+
+            $table->foreign('payment_term_id')
+                ->references('id')
+                ->on('payment_terms')
+                ->nullOnDelete();
+
+            $table->uuid('currency_id')->nullable();
+
+            $table->foreign('currency_id')
+                ->references('id')
+                ->on('currencies')
+                ->nullOnDelete();
 
             $table->string('code');
             $table->string('name');
@@ -25,6 +42,7 @@ return new class extends Migration
             $table->text('address')->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['company_id', 'code']);
         });

@@ -12,10 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('document_sequences', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('module_id')->constrained()->cascadeOnDelete();
+            $table->uuid('module_id');
+            $table->uuid('company_id');
+
+            $table->foreign('module_id')
+                ->references('id')
+                ->on('modules')
+                ->cascadeOnDelete();
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
 
             $table->string('prefix'); // SO, INV, PO
             $table->integer('year');
@@ -23,6 +33,7 @@ return new class extends Migration
             $table->integer('number_length')->default(4);
 
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['company_id', 'module_id', 'year']);
             $table->index(['company_id', 'prefix']);

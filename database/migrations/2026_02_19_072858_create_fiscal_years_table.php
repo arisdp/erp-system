@@ -12,9 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('fiscal_years', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
+            $table->uuid('company_id');
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
 
             $table->string('year'); // 2026
             $table->date('start_date');

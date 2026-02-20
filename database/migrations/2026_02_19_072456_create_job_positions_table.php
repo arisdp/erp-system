@@ -12,10 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('job_positions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->uuid('company_id');
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
             $table->string('name');
             $table->timestamps();
+            $table->softDeletes();
+
+            $table->unique(['company_id', 'name']);
         });
     }
 

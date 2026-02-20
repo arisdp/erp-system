@@ -12,9 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('account_groups', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('account_type_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->uuid('company_id');
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
+
+            $table->uuid('account_type_id');
+
+            $table->foreign('account_type_id')
+                ->references('id')
+                ->on('account_types')
+                ->cascadeOnDelete();
 
             $table->string('code');
             $table->string('name');

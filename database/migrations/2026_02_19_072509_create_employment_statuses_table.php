@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employment_statuses', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name'); // Permanent, Contract
             $table->timestamps();
         });

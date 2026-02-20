@@ -12,13 +12,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('product_categories', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id');
+            $table->primary('id');
+            $table->uuid('company_id');
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
 
             $table->string('name');
-            $table->foreignId('parent_id')->nullable()->constrained('product_categories');
+            $table->uuid('parent_id')->nullable();
+
+            $table->foreign('parent_id')
+                ->references('id')
+                ->on('product_categories')
+                ->cascadeOnDelete();
+            // $table->foreignId('parent_id')->nullable()->constrained('product_categories');
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

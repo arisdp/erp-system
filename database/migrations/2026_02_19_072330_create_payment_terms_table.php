@@ -12,10 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payment_terms', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name'); // NET 30
             $table->integer('days');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -12,28 +12,48 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('chart_of_accounts', function (Blueprint $table) {
-            $table->id();
 
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('account_type_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('account_group_id')->nullable()->constrained()->nullOnDelete();
+            $table->uuid('id');
+            $table->primary('id'); // 🔥 penting untuk PostgreSQL
 
-            $table->foreignId('parent_id')
-                ->nullable()
-                ->constrained('chart_of_accounts')
-                ->nullOnDelete();
+            $table->uuid('company_id');
+            $table->uuid('account_type_id');
+            $table->uuid('account_group_id')->nullable();
+            $table->uuid('parent_id')->nullable();
 
             $table->string('account_code');
             $table->string('account_name');
 
             $table->boolean('is_postable')->default(true);
-            // false = header account (tidak bisa dipost)
-            // true = detail account
-
             $table->boolean('is_active')->default(true);
 
             $table->timestamps();
             $table->softDeletes();
+
+            // ===== FOREIGN KEYS DI BAWAH =====
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
+
+            $table->foreign('account_type_id')
+                ->references('id')
+                ->on('account_types')
+                ->cascadeOnDelete();
+
+            $table->foreign('account_group_id')
+                ->references('id')
+                ->on('account_groups')
+                ->nullOnDelete();
+
+            // 🔥 SELF REFERENCE FIX
+            $table->foreign('parent_id')
+                ->references('id')
+                ->on('chart_of_accounts')
+                ->nullOnDelete(); // lebih aman daripada cascade
+
+            // ===== INDEX & UNIQUE =====
 
             $table->unique(['company_id', 'account_code']);
             $table->index(['company_id', 'account_name']);

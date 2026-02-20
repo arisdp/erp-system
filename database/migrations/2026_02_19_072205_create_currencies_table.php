@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('currencies', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('code')->unique(); // IDR, USD
             $table->string('name');
             $table->decimal('exchange_rate', 18, 6)->default(1);
             $table->boolean('is_base')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

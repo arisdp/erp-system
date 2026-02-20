@@ -12,10 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('branches', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('company_id')
-                ->constrained()
+            $table->uuid('id')->primary();
+            $table->uuid('company_id');
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
                 ->cascadeOnDelete();
+
 
             $table->string('code');
             $table->string('name');
