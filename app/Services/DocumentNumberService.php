@@ -7,36 +7,41 @@ use Illuminate\Support\Facades\DB;
 
 class DocumentNumberService
 {
-    public static function generate($companyId, $moduleId)
+    /**
+     * Generate next document number for a company.
+     * Format: [PREFIX]-[YEAR]-[SEQUENCE]
+     */
+    public function generate(string $type, string $companyId, string $prefix): string
     {
-        return DB::transaction(function () use ($companyId, $moduleId) {
-
+        return DB::transaction(function () use ($type, $companyId, $prefix) {
             $year = date('Y');
-
-            $sequence = DocumentSequence::lockForUpdate()->firstOrCreate(
+            
+            $sequence = DocumentSequence::firstOrCreate(
                 [
                     'company_id' => $companyId,
-                    'module_id' => $moduleId,
+                    'type' => $type,
                     'year' => $year,
                 ],
                 [
-                    'prefix' => 'DOC',
-                    'current_number' => 0,
-                    'number_length' => 4,
+                    'prefix' => $prefix,
+                    'last_number' => 0,
                 ]
             );
 
-            $sequence->increment('current_number');
+            // Row-level lock for concurrency safety
+            $sequenceValue = DB::table('document_sequences')
+                ->where('id', $sequence->id)
+                ->lockForUpdate()
+                ->first();
 
-            $number = str_pad(
-                $sequence->current_number,
-                $sequence->number_length,
-                '0',
-                STR_PAD_LEFT
-            );
+            $nextNumber = $sequenceValue->last_number + 1;
+            $formattedNumber = $prefix . '-' . $year . '-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
-            return "{$sequence->prefix}-{$year}-{$number}";
+            DB::table('document_sequences')
+                ->where('id', $sequence->id)
+                ->update(['last_number' => $nextNumber]);
+
+            return $formattedNumber;
         });
     }
 }
-    

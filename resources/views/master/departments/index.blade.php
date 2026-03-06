@@ -1,37 +1,29 @@
 @extends('layouts.app')
 
-@section('page-title', 'Company Management')
+@section('page-title', 'Department Management')
 
 @section('breadcrumb')
     <ol class="breadcrumb float-sm-right">
-        <li class="breadcrumb-item">
-            <a href="{{ route('dashboard') }}">Dashboard</a>
-        </li>
-        <li class="breadcrumb-item active">Company</li>
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Department</li>
     </ol>
 @endsection
 
 @section('content')
-
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0">
-                <i class="fas fa-building mr-2"></i> Company List
-            </h3>
-
-            <button class="btn btn-primary btn-sm" id="btnAdd">
-                <i class="fas fa-plus mr-1"></i> Add Company
-            </button>
+            <h3 class="card-title mb-0"><i class="fas fa-sitemap mr-2"></i> Department List</h3>
+            <button class="btn btn-primary btn-sm ml-auto" id="btnAdd"><i class="fas fa-plus mr-1"></i> Add
+                Department</button>
         </div>
-
         <div class="card-body">
-            <table id="companyTable" class="table table-bordered table-hover table-striped w-100">
+            <table id="deptTable" class="table table-bordered table-hover table-striped w-100">
                 <thead class="thead-dark">
                     <tr>
-                        <th width="50">ID</th>
+                        <th>Company</th>
                         <th>Code</th>
                         <th>Name</th>
-                        <th width="130" class="text-center">Action</th>
+                        <th width="100" class="text-center">Action</th>
                     </tr>
                 </thead>
             </table>
@@ -39,82 +31,64 @@
     </div>
 
     {{-- Modal --}}
-    <div class="modal fade" id="companyModal">
+    <div class="modal fade" id="deptModal">
         <div class="modal-dialog">
             <div class="modal-content">
-
-                <form id="companyForm">
+                <form id="deptForm">
                     @csrf
-                    <input type="hidden" name="id" id="company_id">
-
+                    <input type="hidden" name="id" id="dept_id">
                     <div class="modal-header">
-                        <h5 class="modal-title">Company Form</h5>
-                        <button type="button" class="close" data-dismiss="modal">
-                            &times;
-                        </button>
+                        <h5 class="modal-title">Department Form</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
-
                     <div class="modal-body">
-
+                        <div class="form-group">
+                            <label>Company</label>
+                            <select name="company_id" id="company_id" class="form-control" required>
+                                <option value="">Select Company</option>
+                                @foreach ($companies as $company)
+                                    <option value="{{ $company->id }}">{{ $company->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label>Code</label>
-                            <input type="text" name="code" id="code" class="form-control">
+                            <input type="text" name="code" id="code" class="form-control" required>
                         </div>
-
                         <div class="form-group">
                             <label>Name</label>
-                            <input type="text" name="name" id="name" class="form-control">
+                            <input type="text" name="name" id="name" class="form-control" required>
                         </div>
-
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" name="email" id="email" class="form-control">
-                        </div>
-
                     </div>
-
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            Cancel
-                        </button>
-
-                        <button type="submit" class="btn btn-success">
-                            Save
-                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Save</button>
                     </div>
-
                 </form>
-
             </div>
         </div>
     </div>
-
 @endsection
-
 
 @push('scripts')
     <script>
         let table;
-
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
-            timer: 2500,
-            timerProgressBar: true,
+            timer: 2500
         });
 
         $(document).ready(function() {
-
-            table = $('#companyTable').DataTable({
+            table = $('#deptTable').DataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 autoWidth: false,
-                ajax: "{{ route('companies.index') }}",
+                ajax: "{{ route('departments.index') }}",
                 columns: [{
-                        data: 'id',
-                        visible: false
+                        data: 'company_name'
                     },
                     {
                         data: 'code'
@@ -133,17 +107,13 @@
 
             $('#btnAdd').click(function() {
                 resetForm();
-                $('#companyModal').modal('show');
+                $('#deptModal').modal('show');
             });
 
-            $('#companyForm').submit(function(e) {
+            $('#deptForm').submit(function(e) {
                 e.preventDefault();
-
-                let id = $('#company_id').val();
-                let url = id ?
-                    "/master/companies/" + id :
-                    "{{ route('companies.store') }}";
-
+                let id = $('#dept_id').val();
+                let url = id ? "/master/departments/" + id : "{{ route('departments.store') }}";
                 let method = id ? "PUT" : "POST";
 
                 $.ajax({
@@ -151,85 +121,65 @@
                     type: method,
                     data: $(this).serialize(),
                     success: function(res) {
-
-                        $('#companyModal').modal('hide');
+                        $('#deptModal').modal('hide');
                         table.ajax.reload(null, false);
-
                         Toast.fire({
                             icon: 'success',
                             title: res.message
                         });
-
                         resetForm();
                     },
                     error: function() {
                         Toast.fire({
                             icon: 'error',
-                            title: 'Validation error'
+                            title: 'Error processing request'
                         });
                     }
                 });
             });
 
             $(document).on('click', '.btn-edit', function() {
-
                 let id = $(this).data('id');
-
-                $.get("/master/companies/" + id + "/edit", function(res) {
-
-                    $('#company_id').val(res.id);
+                $.get("/master/departments/" + id + "/edit", function(res) {
+                    $('#dept_id').val(res.id);
+                    $('#company_id').val(res.company_id);
                     $('#code').val(res.code);
                     $('#name').val(res.name);
-                    $('#email').val(res.email);
-
-                    $('#companyModal').modal('show');
+                    $('#deptModal').modal('show');
                 });
-
             });
 
             $(document).on('click', '.btn-delete', function() {
-
                 let id = $(this).data('id');
-
                 Swal.fire({
-                    title: 'Delete this company?',
-                    text: "This action cannot be undone",
+                    title: 'Delete this department?',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it'
+                    confirmButtonText: 'Yes'
                 }).then((result) => {
-
                     if (result.isConfirmed) {
-
                         $.ajax({
-                            url: "/master/companies/" + id,
+                            url: "/master/departments/" + id,
                             type: "DELETE",
                             data: {
                                 _token: "{{ csrf_token() }}"
                             },
                             success: function(res) {
-
                                 table.ajax.reload(null, false);
-
                                 Toast.fire({
                                     icon: 'success',
                                     title: res.message
                                 });
                             }
                         });
-
                     }
-
                 });
-
             });
 
             function resetForm() {
-                $('#company_id').val('');
-                $('#companyForm')[0].reset();
+                $('#dept_id').val('');
+                $('#deptForm')[0].reset();
             }
-
         });
     </script>
 @endpush

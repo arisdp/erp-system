@@ -2,30 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Core\Traits\MultiTenant;
 use App\Traits\Auditable;
 
-class Role extends Model
+class Branch extends Model
 {
-    use HasFactory, HasUuids, Auditable, SoftDeletes;
+    use HasFactory, HasUuids, MultiTenant, Auditable, SoftDeletes;
 
     protected $fillable = [
         'company_id',
+        'code',
         'name',
-        'guard_name',
+        'address',
+        'is_active',
     ];
 
     public function company()
     {
         return $this->belongsTo(Company::class);
-    }
-
-    public function users()
-    {
-        return $this->belongsToMany(User::class);
     }
 }

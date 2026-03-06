@@ -29,7 +29,7 @@ return new class extends Migration
 
             $table->string('event'); // created, updated, deleted
             $table->string('auditable_type');
-            $table->unsignedBigInteger('auditable_id');
+            $table->uuid('auditable_id');
 
             $table->json('old_values')->nullable();
             $table->json('new_values')->nullable();

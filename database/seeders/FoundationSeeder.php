@@ -24,6 +24,7 @@ class FoundationSeeder extends Seeder
 
         // Create Admin User
         $user = User::create([
+            'company_id' => $company->id,
             'name' => 'Super Admin',
             'email' => 'admin@erp.test',
             'password' => Hash::make('password'),

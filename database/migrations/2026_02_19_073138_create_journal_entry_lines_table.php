@@ -17,6 +17,8 @@ return new class extends Migration
             $table->primary('id');
 
             $table->uuid('journal_entry_id');
+            $table->uuid('company_id');
+            $table->uuid('branch_id')->nullable();
             $table->uuid('account_id');
 
             $table->decimal('debit', 18, 2)->default(0);
@@ -32,6 +34,16 @@ return new class extends Migration
                 ->references('id')
                 ->on('journal_entries')
                 ->cascadeOnDelete();
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->cascadeOnDelete();
+
+            $table->foreign('branch_id')
+                ->references('id')
+                ->on('branches')
+                ->nullOnDelete();
 
             $table->foreign('account_id')
                 ->references('id')

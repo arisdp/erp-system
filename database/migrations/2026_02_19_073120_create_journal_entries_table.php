@@ -17,6 +17,7 @@ return new class extends Migration
             $table->primary('id');
 
             $table->uuid('company_id');
+            $table->uuid('branch_id')->nullable();
             $table->uuid('fiscal_year_id');
 
             $table->string('journal_number')->unique();
@@ -45,6 +46,11 @@ return new class extends Migration
                 ->references('id')
                 ->on('companies')
                 ->cascadeOnDelete();
+
+            $table->foreign('branch_id')
+                ->references('id')
+                ->on('branches')
+                ->nullOnDelete();
 
             $table->foreign('fiscal_year_id')
                 ->references('id')
