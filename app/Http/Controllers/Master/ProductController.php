@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Unit;
+use App\Models\TaxRate;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -83,6 +84,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'category_id' => 'nullable|exists:product_categories,id',
             'unit_id' => 'required|exists:units,id',
+            'tax_rate_id' => 'nullable|exists:tax_rates,id',
             'purchase_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'description' => 'nullable|string',

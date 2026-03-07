@@ -41,6 +41,20 @@ Route::middleware('auth')->group(function () {
         Route::resource('tax-rates', \App\Http\Controllers\Master\TaxRateController::class);
         Route::resource('currencies', \App\Http\Controllers\Master\CurrencyController::class);
     });
+
+    // PROCUREMENT
+    Route::group(['prefix' => 'procurement'], function () {
+        Route::resource('purchase-orders', \App\Http\Controllers\Procurement\PurchaseOrderController::class);
+        Route::resource('goods-receipts', \App\Http\Controllers\Procurement\GoodsReceiptController::class);
+        Route::resource('purchase-invoices', \App\Http\Controllers\Procurement\PurchaseInvoiceController::class);
+    });
+
+    // SALES
+    Route::group(['prefix' => 'sales'], function () {
+        Route::resource('sales-orders', \App\Http\Controllers\Sales\SalesOrderController::class);
+        Route::resource('delivery-orders', \App\Http\Controllers\Sales\DeliveryOrderController::class);
+        Route::resource('sales-invoices', \App\Http\Controllers\Sales\SalesInvoiceController::class);
+    });
 });
 
 require __DIR__ . '/auth.php';

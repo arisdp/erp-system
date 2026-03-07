@@ -207,6 +207,54 @@
                     </a>
                 </li>
 
+                {{-- Group: PROCUREMENT --}}
+                <li class="nav-header">PROCUREMENT</li>
+                <li class="nav-item">
+                    <a href="{{ route('purchase-orders.index') }}"
+                        class="nav-link {{ request()->routeIs('purchase-orders.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <p>Purchase Orders</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('goods-receipts.index') }}"
+                        class="nav-link {{ request()->routeIs('goods-receipts.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-truck-loading"></i>
+                        <p>Goods Receipts (GRN)</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('purchase-invoices.index') }}"
+                        class="nav-link {{ request()->routeIs('purchase-invoices.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                        <p>Purchase Invoices (AP)</p>
+                    </a>
+                </li>
+
+                {{-- Group: SALES --}}
+                <li class="nav-header">SALES</li>
+                <li class="nav-item">
+                    <a href="{{ route('sales-orders.index') }}"
+                        class="nav-link {{ request()->routeIs('sales-orders.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <p>Sales Orders (SO)</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('delivery-orders.index') }}"
+                        class="nav-link {{ request()->routeIs('delivery-orders.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <p>Delivery Orders (DO)</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('sales-invoices.index') }}"
+                        class="nav-link {{ request()->routeIs('sales-invoices.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                        <p>Sales Invoices (AR)</p>
+                    </a>
+                </li>
+
                 {{-- Group: REPORTS --}}
                 <li class="nav-header">REPORTS</li>
                 <li class="nav-item">

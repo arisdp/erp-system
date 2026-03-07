@@ -11,10 +11,10 @@ class DocumentSequence extends Model
 
     protected $fillable = [
         'company_id',
-        'module_id',
+        'type',
         'prefix',
         'year',
-        'current_number',
+        'last_number',
         'number_length',
     ];
 }

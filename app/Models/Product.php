@@ -46,4 +46,9 @@ class Product extends Model
     {
         return $this->belongsTo(Unit::class);
     }
+
+    public function taxRate()
+    {
+        return $this->belongsTo(TaxRate::class);
+    }
 }
