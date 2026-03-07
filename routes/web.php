@@ -27,6 +27,19 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', \App\Http\Controllers\Master\UserController::class);
         Route::resource('roles', \App\Http\Controllers\Master\RoleController::class);
         Route::resource('accounts', \App\Http\Controllers\Master\AccountController::class);
+        Route::resource('account-groups', \App\Http\Controllers\Master\AccountGroupController::class);
+        Route::resource('fiscal-years', \App\Http\Controllers\Master\FiscalYearController::class);
+        Route::resource('journals', \App\Http\Controllers\General\JournalController::class);
+        
+        // Inventory
+        Route::resource('units', \App\Http\Controllers\Master\UnitController::class);
+        Route::resource('warehouses', \App\Http\Controllers\Master\WarehouseController::class);
+        Route::resource('product-categories', \App\Http\Controllers\Master\ProductCategoryController::class);
+        Route::resource('products', \App\Http\Controllers\Master\ProductController::class);
+        Route::resource('customers', \App\Http\Controllers\Master\CustomerController::class);
+        Route::resource('suppliers', \App\Http\Controllers\Master\SupplierController::class);
+        Route::resource('tax-rates', \App\Http\Controllers\Master\TaxRateController::class);
+        Route::resource('currencies', \App\Http\Controllers\Master\CurrencyController::class);
     });
 });
 

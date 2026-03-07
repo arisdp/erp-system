@@ -55,7 +55,9 @@ class JournalService
             foreach ($data['lines'] as $line) {
                 JournalEntryLine::create([
                     'journal_entry_id' => $journal->id,
-                    'chart_of_account_id' => $line['chart_of_account_id'],
+                    'account_id' => $line['account_id'],
+                    'company_id' => $data['company_id'],
+                    'branch_id' => $data['branch_id'],
                     'description' => $line['description'] ?? '',
                     'debit' => $line['debit'],
                     'credit' => $line['credit'],

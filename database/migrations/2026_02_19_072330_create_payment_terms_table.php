@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('payment_terms', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('company_id')->nullable();
+
+            $table->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->nullOnDelete();
+
             $table->string('name'); // NET 30
             $table->integer('days');
             $table->timestamps();

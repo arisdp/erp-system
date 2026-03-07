@@ -88,9 +88,86 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('account-groups.index') }}"
+                        class="nav-link {{ request()->routeIs('account-groups.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-layer-group"></i>
+                        <p>Account Groups</p>
+                    </a>
+                </li>
+                <li class="nav-item border-bottom pb-2 mb-2" style="border-color: #4b545c !important;">
+                    <a href="{{ route('fiscal-years.index') }}"
+                        class="nav-link {{ request()->routeIs('fiscal-years.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>Fiscal Years</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('journals.index') }}"
+                        class="nav-link {{ request()->routeIs('journals.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-book"></i>
                         <p>Journal Entries</p>
+                    </a>
+                </li>
+
+                <li class="nav-header">INVENTORY & LOGISTICS</li>
+                <li class="nav-item">
+                    <a href="{{ route('products.index') }}"
+                        class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-box"></i>
+                        <p>Products</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('product-categories.index') }}"
+                        class="nav-link {{ request()->routeIs('product-categories.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-tags"></i>
+                        <p>Categories</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('units.index') }}"
+                        class="nav-link {{ request()->routeIs('units.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-balance-scale"></i>
+                        <p>Units of Measure</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('warehouses.index') }}"
+                        class="nav-link {{ request()->routeIs('warehouses.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-warehouse"></i>
+                        <p>Warehouses</p>
+                    </a>
+                </li>
+
+                <li class="nav-header">STAKEHOLDERS</li>
+                <li class="nav-item">
+                    <a href="{{ route('customers.index') }}"
+                        class="nav-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>Customers</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('suppliers.index') }}"
+                        class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <p>Suppliers</p>
+                    </a>
+                </li>
+
+                <li class="nav-header">FINANCE MASTER</li>
+                <li class="nav-item">
+                    <a href="{{ route('tax-rates.index') }}"
+                        class="nav-link {{ request()->routeIs('tax-rates.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-percentage"></i>
+                        <p>Tax Rates</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('currencies.index') }}"
+                        class="nav-link {{ request()->routeIs('currencies.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <p>Currencies</p>
                     </a>
                 </li>
 

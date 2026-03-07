@@ -14,18 +14,18 @@ return new class extends Migration
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->uuid('user_id');
-            $table->uuid('company_id');
+            $table->uuid('user_id')->nullable();
+            $table->uuid('company_id')->nullable();
 
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
 
             $table->foreign('company_id')
                 ->references('id')
                 ->on('companies')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
 
             $table->string('event'); // created, updated, deleted
             $table->string('auditable_type');
