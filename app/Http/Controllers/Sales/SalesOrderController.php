@@ -3,18 +3,22 @@
 namespace App\Http\Controllers\Sales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Sales\StoreSalesOrderRequest;
 use App\Models\SalesOrder;
 use App\Models\SalesOrderLine;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\TaxRate;
 use App\Services\DocumentNumberService;
+use App\Traits\HasTaxCalculation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class SalesOrderController extends Controller
 {
+    use HasTaxCalculation;
+
     protected $docService;
 
     public function __construct(DocumentNumberService $docService)
@@ -63,19 +67,8 @@ class SalesOrderController extends Controller
         return view('sales.sales_orders.create', compact('customers', 'products', 'taxRates', 'marketplaces', 'nextNumber'));
     }
 
-    public function store(Request $request)
+    public function store(StoreSalesOrderRequest $request)
     {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'order_date' => 'required|date',
-            'transaction_type' => 'required|in:Offline,Online',
-            'marketplace_id' => 'required_if:transaction_type,Online|nullable|exists:marketplaces,id',
-            'lines' => 'required|array|min:1',
-            'lines.*.product_id' => 'required|exists:products,id',
-            'lines.*.quantity' => 'required|numeric|min:0.000001',
-            'lines.*.unit_price' => 'required|numeric|min:0',
-        ]);
-
         return DB::transaction(function () use ($request) {
             $soNumber = $this->docService->generate('SO', auth()->user()->company_id, 'SO');
             
@@ -98,12 +91,7 @@ class SalesOrderController extends Controller
 
             foreach ($request->lines as $lineData) {
                 $subtotal = $lineData['quantity'] * $lineData['unit_price'];
-                
-                $lineTax = 0;
-                if (!empty($lineData['tax_rate_id'])) {
-                    $tr = TaxRate::find($lineData['tax_rate_id']);
-                    $lineTax = ($subtotal * $tr->rate) / 100;
-                }
+                $lineTax = $this->calculateTax($subtotal, $lineData['tax_rate_id'] ?? null);
 
                 SalesOrderLine::create([
                     'sales_order_id' => $so->id,
@@ -123,7 +111,11 @@ class SalesOrderController extends Controller
             $so->update([
                 'total_amount' => $totalAmount,
                 'tax_amount' => $taxAmount,
-                'net_amount' => ($totalAmount + $taxAmount) - ($request->platform_fee ?? 0) - ($request->platform_discount ?? 0) + ($request->platform_voucher ?? 0),
+                'net_amount' => $this->calculateNet($totalAmount, $taxAmount, [
+                    'fee' => $request->platform_fee ?? 0,
+                    'discount' => $request->platform_discount ?? 0,
+                    'voucher' => $request->platform_voucher ?? 0,
+                ]),
             ]);
 
             return redirect()->route('sales-orders.index')->with('success', 'Sales Order ' . $soNumber . ' created successfully');

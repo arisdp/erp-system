@@ -3,18 +3,22 @@
 namespace App\Http\Controllers\Sales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Sales\StoreSalesInvoiceRequest;
 use App\Models\SalesInvoice;
 use App\Models\SalesInvoiceLine;
 use App\Models\SalesOrder;
 use App\Models\DeliveryOrder;
 use App\Models\Customer;
 use App\Services\DocumentNumberService;
+use App\Traits\HasTaxCalculation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class SalesInvoiceController extends Controller
 {
+    use HasTaxCalculation;
+
     protected $docNumberService;
 
     public function __construct(DocumentNumberService $docNumberService)
@@ -65,21 +69,15 @@ class SalesInvoiceController extends Controller
             $sourceData = DeliveryOrder::with(['lines.product', 'lines.unit', 'salesOrder.customer'])->findOrFail($request->delivery_order_id);
         }
 
-        $nextNumber = $this->docNumberService->generate('SI', date('Y-m-d'));
+        $nextNumber = $this->docNumberService->generate('SI', auth()->user()->company_id, 'SI');
 
         return view('sales.sales_invoices.create', compact('customers', 'sourceType', 'sourceData', 'nextNumber'));
     }
 
-    public function store(Request $request)
+    public function store(StoreSalesInvoiceRequest $request)
     {
-        $request->validate([
-            'customer_id' => 'required',
-            'invoice_date' => 'required|date',
-            'items' => 'required|array|min:1',
-        ]);
-
         return DB::transaction(function () use ($request) {
-            $invoiceNumber = $this->docNumberService->generate('SI', $request->invoice_date);
+            $invoiceNumber = $this->docNumberService->generate('SI', auth()->user()->company_id, 'SI');
             
             $invoice = SalesInvoice::create([
                 'company_id' => auth()->user()->company_id,
@@ -99,7 +97,7 @@ class SalesInvoiceController extends Controller
 
             foreach ($request->items as $item) {
                 $subtotal = $item['quantity'] * $item['unit_price'];
-                $lineTax = ($subtotal * ($item['tax_rate'] ?? 0)) / 100;
+                $lineTax = $this->calculateTax($subtotal, $item['tax_rate_id'] ?? null);
 
                 SalesInvoiceLine::create([
                     'sales_invoice_id' => $invoice->id,
@@ -119,7 +117,7 @@ class SalesInvoiceController extends Controller
             $invoice->update([
                 'total_amount' => $totalAmount,
                 'tax_amount' => $taxAmount,
-                'net_amount' => ($totalAmount + $taxAmount) - ($request->platform_fee ?? 0),
+                'net_amount' => $this->calculateNet($totalAmount, $taxAmount, ['fee' => $request->platform_fee ?? 0]),
             ]);
 
             return redirect()->route('sales-invoices.index')->with('success', 'Invoice ' . $invoiceNumber . ' created successfully');

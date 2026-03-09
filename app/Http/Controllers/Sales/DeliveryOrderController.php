@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Sales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Sales\StoreDeliveryOrderRequest;
 use App\Models\DeliveryOrder;
 use App\Models\DeliveryOrderLine;
 use App\Models\SalesOrder;
 use App\Models\Warehouse;
 use App\Services\DocumentNumberService;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -15,10 +17,12 @@ use Yajra\DataTables\Facades\DataTables;
 class DeliveryOrderController extends Controller
 {
     protected $docService;
+    protected $invService;
 
-    public function __construct(DocumentNumberService $docService)
+    public function __construct(DocumentNumberService $docService, InventoryService $invService)
     {
         $this->docService = $docService;
+        $this->invService = $invService;
     }
 
     public function index(Request $request)
@@ -64,17 +68,8 @@ class DeliveryOrderController extends Controller
         return view('sales.delivery_orders.create', compact('salesOrder', 'salesOrders', 'warehouses', 'nextNumber'));
     }
 
-    public function store(Request $request)
+    public function store(StoreDeliveryOrderRequest $request)
     {
-        $request->validate([
-            'sales_order_id' => 'required|exists:sales_orders,id',
-            'warehouse_id' => 'required|exists:warehouses,id',
-            'delivery_date' => 'required|date',
-            'lines' => 'required|array|min:1',
-            'lines.*.product_id' => 'required|exists:products,id',
-            'lines.*.quantity_shipped' => 'required|numeric|min:0.000001',
-        ]);
-
         return DB::transaction(function () use ($request) {
             $doNumber = $this->docService->generate('DO', auth()->user()->company_id, 'DO');
             
@@ -84,12 +79,14 @@ class DeliveryOrderController extends Controller
                 'warehouse_id' => $request->warehouse_id,
                 'do_number' => $doNumber,
                 'delivery_date' => $request->delivery_date,
-                'status' => 'Draft',
+                'status' => 'Shipped', // Changed to shipped when processed
                 'shipped_by' => $request->shipped_by,
                 'notes' => $request->notes,
             ]);
 
             foreach ($request->lines as $lineData) {
+                if ($lineData['quantity_shipped'] <= 0) continue;
+
                 DeliveryOrderLine::create([
                     'delivery_order_id' => $do->id,
                     'sales_order_line_id' => $lineData['sales_order_line_id'] ?? null,
@@ -98,6 +95,31 @@ class DeliveryOrderController extends Controller
                     'quantity_ordered' => $lineData['quantity_ordered'] ?? 0,
                     'quantity_shipped' => $lineData['quantity_shipped'],
                 ]);
+
+                // Update stock levels
+                $unitPrice = 0;
+                if (!empty($lineData['sales_order_line_id'])) {
+                    $soLine = \App\Models\SalesOrderLine::find($lineData['sales_order_line_id']);
+                    $unitPrice = $soLine ? $soLine->unit_price : 0;
+                }
+
+                $this->invService->recordTransaction(
+                    auth()->user()->company_id,
+                    $request->warehouse_id,
+                    $lineData['product_id'],
+                    'DO',
+                    -$lineData['quantity_shipped'], // Negative for out
+                    $unitPrice,
+                    DeliveryOrder::class,
+                    $do->id,
+                    'Shipped via DO ' . $doNumber,
+                    $request->delivery_date
+                );
+            }
+
+            // Update SO status
+            if ($request->sales_order_id) {
+                SalesOrder::find($request->sales_order_id)->update(['status' => 'Delivered']);
             }
 
             return redirect()->route('delivery-orders.index')->with('success', 'Delivery Order ' . $doNumber . ' created successfully');

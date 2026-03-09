@@ -3,20 +3,23 @@
 namespace App\Http\Controllers\Procurement;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Procurement\StorePurchaseInvoiceRequest;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceLine;
 use App\Models\GoodsReceipt;
-use App\Models\GoodsReceiptLine;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\TaxRate;
 use App\Services\DocumentNumberService;
+use App\Traits\HasTaxCalculation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class PurchaseInvoiceController extends Controller
 {
+    use HasTaxCalculation;
+
     protected $docService;
 
     public function __construct(DocumentNumberService $docService)
@@ -68,17 +71,8 @@ class PurchaseInvoiceController extends Controller
         return view('procurement.purchase_invoices.create', compact('suppliers', 'purchaseOrders', 'goodsReceipt', 'nextNumber'));
     }
 
-    public function store(Request $request)
+    public function store(StorePurchaseInvoiceRequest $request)
     {
-        $request->validate([
-            'supplier_id' => 'required|exists:suppliers,id',
-            'invoice_date' => 'required|date',
-            'lines' => 'required|array|min:1',
-            'lines.*.product_id' => 'required|exists:products,id',
-            'lines.*.quantity' => 'required|numeric|min:0.000001',
-            'lines.*.unit_price' => 'required|numeric|min:0',
-        ]);
-
         return DB::transaction(function () use ($request) {
             $invoiceNumber = $this->docService->generate('PINV', auth()->user()->company_id, 'INV');
             
@@ -99,12 +93,7 @@ class PurchaseInvoiceController extends Controller
 
             foreach ($request->lines as $lineData) {
                 $subtotal = $lineData['quantity'] * $lineData['unit_price'];
-                
-                $lineTax = 0;
-                if (!empty($lineData['tax_rate_id'])) {
-                    $tr = TaxRate::find($lineData['tax_rate_id']);
-                    $lineTax = ($subtotal * $tr->rate) / 100;
-                }
+                $lineTax = $this->calculateTax($subtotal, $lineData['tax_rate_id'] ?? null);
 
                 PurchaseInvoiceLine::create([
                     'purchase_invoice_id' => $invoice->id,
@@ -125,7 +114,7 @@ class PurchaseInvoiceController extends Controller
             $invoice->update([
                 'total_amount' => $totalAmount,
                 'tax_amount' => $taxAmount,
-                'net_amount' => $totalAmount + $taxAmount,
+                'net_amount' => $this->calculateNet($totalAmount, $taxAmount),
             ]);
 
             return redirect()->route('purchase-invoices.index')->with('success', 'Purchase Invoice ' . $invoiceNumber . ' created successfully');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Procurement;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Procurement\StorePurchaseOrderRequest;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use App\Models\Supplier;
@@ -12,12 +13,15 @@ use App\Models\TaxRate;
 use App\Models\PaymentTerm;
 use App\Models\Currency;
 use App\Services\DocumentNumberService;
+use App\Traits\HasTaxCalculation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class PurchaseOrderController extends Controller
 {
+    use HasTaxCalculation;
+
     protected $docService;
 
     public function __construct(DocumentNumberService $docService)
@@ -69,17 +73,8 @@ class PurchaseOrderController extends Controller
         return view('procurement.purchase_orders.create', compact('suppliers', 'products', 'taxRates', 'paymentTerms', 'currencies', 'nextNumber'));
     }
 
-    public function store(Request $request)
+    public function store(StorePurchaseOrderRequest $request)
     {
-        $request->validate([
-            'supplier_id' => 'required|exists:suppliers,id',
-            'order_date' => 'required|date',
-            'lines' => 'required|array|min:1',
-            'lines.*.product_id' => 'required|exists:products,id',
-            'lines.*.quantity' => 'required|numeric|min:0.000001',
-            'lines.*.unit_price' => 'required|numeric|min:0',
-        ]);
-
         return DB::transaction(function () use ($request) {
             $poNumber = $this->docService->generate('PO', auth()->user()->company_id, 'PUR');
             
@@ -101,13 +96,7 @@ class PurchaseOrderController extends Controller
             foreach ($request->lines as $lineData) {
                 $product = Product::find($lineData['product_id']);
                 $subtotal = $lineData['quantity'] * $lineData['unit_price'];
-                
-                // Calculate tax if applicable
-                $lineTax = 0;
-                if (!empty($lineData['tax_rate_id'])) {
-                    $tr = TaxRate::find($lineData['tax_rate_id']);
-                    $lineTax = ($subtotal * $tr->rate) / 100;
-                }
+                $lineTax = $this->calculateTax($subtotal, $lineData['tax_rate_id'] ?? null);
 
                 PurchaseOrderLine::create([
                     'purchase_order_id' => $po->id,
@@ -128,7 +117,7 @@ class PurchaseOrderController extends Controller
             $po->update([
                 'total_amount' => $totalAmount,
                 'tax_amount' => $taxAmount,
-                'net_amount' => $totalAmount + $taxAmount,
+                'net_amount' => $this->calculateNet($totalAmount, $taxAmount),
             ]);
 
             return redirect()->route('purchase-orders.index')->with('success', 'Purchase Order ' . $poNumber . ' created successfully');

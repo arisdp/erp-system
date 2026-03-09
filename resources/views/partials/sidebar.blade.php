@@ -213,7 +213,7 @@
                     <a href="{{ route('purchase-orders.index') }}"
                         class="nav-link {{ request()->routeIs('purchase-orders.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-shopping-cart"></i>
-                        <p>Purchase Orders</p>
+                        <p>Purchase Orders (PO)</p>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -264,6 +264,22 @@
                     </a>
                 </li>
 
+                <!-- INVENTORY -->
+                <li class="nav-header">INVENTORY</li>
+                <li class="nav-item">
+                    <a href="{{ route('stock-cards.index') }}"
+                        class="nav-link {{ request()->routeIs('stock-cards.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <p>Stock Balances / Cards</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('stock-adjustments.index') }}"
+                        class="nav-link {{ request()->routeIs('stock-adjustments.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-balance-scale"></i>
+                        <p>Stock Adjustments</p>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>

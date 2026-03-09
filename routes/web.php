@@ -42,6 +42,13 @@ Route::middleware('auth')->group(function () {
         Route::resource('currencies', \App\Http\Controllers\Master\CurrencyController::class);
     });
 
+    // INVENTORY
+    Route::group(['prefix' => 'inventory'], function () {
+        Route::resource('stock-adjustments', \App\Http\Controllers\Inventory\StockAdjustmentController::class);
+        Route::get('stock-cards', [\App\Http\Controllers\Inventory\StockCardController::class, 'index'])->name('stock-cards.index');
+        Route::get('stock-cards/{product_id}/{warehouse_id}', [\App\Http\Controllers\Inventory\StockCardController::class, 'show'])->name('stock-cards.show');
+    });
+
     // PROCUREMENT
     Route::group(['prefix' => 'procurement'], function () {
         Route::resource('purchase-orders', \App\Http\Controllers\Procurement\PurchaseOrderController::class);

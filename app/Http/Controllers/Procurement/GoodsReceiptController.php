@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Procurement;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Procurement\StoreGoodsReceiptRequest;
 use App\Models\GoodsReceipt;
 use App\Models\GoodsReceiptLine;
 use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderLine;
 use App\Models\Warehouse;
 use App\Services\DocumentNumberService;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -16,10 +17,12 @@ use Yajra\DataTables\Facades\DataTables;
 class GoodsReceiptController extends Controller
 {
     protected $docService;
+    protected $invService;
 
-    public function __construct(DocumentNumberService $docService)
+    public function __construct(DocumentNumberService $docService, InventoryService $invService)
     {
         $this->docService = $docService;
+        $this->invService = $invService;
     }
 
     public function index(Request $request)
@@ -65,16 +68,8 @@ class GoodsReceiptController extends Controller
         return view('procurement.goods_receipts.create', compact('purchaseOrders', 'warehouses', 'purchaseOrder', 'nextNumber'));
     }
 
-    public function store(Request $request)
+    public function store(StoreGoodsReceiptRequest $request)
     {
-        $request->validate([
-            'warehouse_id' => 'required|exists:warehouses,id',
-            'received_date' => 'required|date',
-            'lines' => 'required|array|min:1',
-            'lines.*.product_id' => 'required|exists:products,id',
-            'lines.*.quantity_received' => 'required|numeric|min:0',
-        ]);
-
         return DB::transaction(function () use ($request) {
             $grnNumber = $this->docService->generate('GRN', auth()->user()->company_id, 'GRN');
             
@@ -92,7 +87,7 @@ class GoodsReceiptController extends Controller
             foreach ($request->lines as $lineData) {
                 if ($lineData['quantity_received'] <= 0) continue;
 
-                GoodsReceiptLine::create([
+                $grnLine = GoodsReceiptLine::create([
                     'goods_receipt_id' => $grn->id,
                     'purchase_order_line_id' => $lineData['purchase_order_line_id'] ?? null,
                     'product_id' => $lineData['product_id'],
@@ -103,7 +98,25 @@ class GoodsReceiptController extends Controller
                     'expiry_date' => $lineData['expiry_date'] ?? null,
                 ]);
 
-                // TODO: Update stock levels here in Phase 6
+                // Update stock levels
+                $unitPrice = 0;
+                if (!empty($lineData['purchase_order_line_id'])) {
+                    $poLine = \App\Models\PurchaseOrderLine::find($lineData['purchase_order_line_id']);
+                    $unitPrice = $poLine ? $poLine->unit_price : 0;
+                }
+
+                $this->invService->recordTransaction(
+                    auth()->user()->company_id,
+                    $request->warehouse_id,
+                    $lineData['product_id'],
+                    'GRN',
+                    $lineData['quantity_received'], // Positive for in
+                    $unitPrice,
+                    GoodsReceipt::class,
+                    $grn->id,
+                    'Received via GRN ' . $grnNumber,
+                    $request->received_date
+                );
             }
 
             // Update PO status if all received
