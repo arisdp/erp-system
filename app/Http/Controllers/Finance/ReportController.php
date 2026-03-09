@@ -30,6 +30,20 @@ class ReportController extends Controller
         ]));
     }
 
+    public function printProfitLoss(Request $request)
+    {
+        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->toDateString());
+        $companyId = auth()->user()->company_id;
+
+        $data = $this->reportService->getProfitLoss($companyId, $startDate, $endDate);
+
+        return view('reports.print.profit_loss', array_merge($data, [
+            'startDate' => $startDate,
+            'endDate' => $endDate
+        ]));
+    }
+
     public function balanceSheet(Request $request)
     {
         $date = $request->get('date', Carbon::now()->toDateString());
@@ -38,6 +52,18 @@ class ReportController extends Controller
         $data = $this->reportService->getBalanceSheet($companyId, $date);
 
         return view('reports.balance_sheet', array_merge($data, [
+            'date' => $date
+        ]));
+    }
+
+    public function printBalanceSheet(Request $request)
+    {
+        $date = $request->get('date', Carbon::now()->toDateString());
+        $companyId = auth()->user()->company_id;
+
+        $data = $this->reportService->getBalanceSheet($companyId, $date);
+
+        return view('reports.print.balance_sheet', array_merge($data, [
             'date' => $date
         ]));
     }

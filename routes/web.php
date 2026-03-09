@@ -13,6 +13,9 @@ use App\Http\Controllers\Finance\AssetCategoryController;
 use App\Http\Controllers\Finance\AssetController;
 use App\Http\Controllers\Finance\ReportController;
 use App\Http\Controllers\System\AuditLogController;
+use App\Http\Controllers\Sales\SalesOrderController;
+use App\Http\Controllers\Procurement\PurchaseOrderController;
+use App\Http\Controllers\ApprovalController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -25,6 +28,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Approvals
+    Route::get('approvals', [ApprovalController::class, 'index'])->name('approvals.index');
+    Route::post('approvals/{id}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
+    Route::post('approvals/{id}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
+    Route::get('approvals/approve/{id}', [ApprovalController::class, 'approveViaLink'])->name('approvals.approve-link');
+    Route::get('approvals/reject/{id}', [ApprovalController::class, 'rejectViaLink'])->name('approvals.reject-link');
+
     // Finance & Reports
     Route::resource('bank-accounts', BankAccountController::class);
     Route::resource('bank-transactions', BankTransactionController::class);
@@ -32,7 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::post('assets/run-depreciation', [AssetController::class, 'runDepreciation'])->name('assets.run-depreciation');
     Route::resource('assets', AssetController::class);
     Route::get('reports/profit-loss', [ReportController::class, 'profitLoss'])->name('reports.profit-loss');
+    Route::get('reports/profit-loss/print', [ReportController::class, 'printProfitLoss'])->name('reports.profit-loss.print');
     Route::get('reports/balance-sheet', [ReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
+    Route::get('reports/balance-sheet/print', [ReportController::class, 'printBalanceSheet'])->name('reports.balance-sheet.print');
     Route::get('system/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
 
     Route::prefix('master')->group(function () {
@@ -68,7 +80,8 @@ Route::middleware('auth')->group(function () {
 
     // PROCUREMENT
     Route::group(['prefix' => 'procurement'], function () {
-        Route::resource('purchase-orders', \App\Http\Controllers\Procurement\PurchaseOrderController::class);
+        Route::post('purchase-orders/{id}/submit', [PurchaseOrderController::class, 'submit'])->name('purchase-orders.submit');
+        Route::resource('purchase-orders', PurchaseOrderController::class);
         Route::get('goods-receipts/{goodsReceipt}/print-qr', [\App\Http\Controllers\Procurement\GoodsReceiptController::class, 'printQr'])->name('goods-receipts.print-qr');
         Route::resource('goods-receipts', \App\Http\Controllers\Procurement\GoodsReceiptController::class);
         Route::resource('purchase-invoices', \App\Http\Controllers\Procurement\PurchaseInvoiceController::class);
@@ -76,7 +89,8 @@ Route::middleware('auth')->group(function () {
 
     // SALES
     Route::group(['prefix' => 'sales'], function () {
-        Route::resource('sales-orders', \App\Http\Controllers\Sales\SalesOrderController::class);
+        Route::post('sales-orders/{id}/submit', [SalesOrderController::class, 'submit'])->name('sales-orders.submit');
+        Route::resource('sales-orders', SalesOrderController::class);
         Route::resource('delivery-orders', \App\Http\Controllers\Sales\DeliveryOrderController::class);
         Route::resource('sales-invoices', \App\Http\Controllers\Sales\SalesInvoiceController::class);
     });

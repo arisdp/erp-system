@@ -16,6 +16,10 @@
                             <input type="date" name="date" class="form-control" value="{{ $date }}">
                         </div>
                         <button type="submit" class="btn btn-info">View Balance Sheet</button>
+                        <a href="{{ route('reports.balance-sheet.print', ['date' => $date]) }}" target="_blank"
+                            class="btn btn-success ml-2">
+                            <i class="fas fa-file-pdf mr-1"></i> Export PDF
+                        </a>
                         <button type="button" class="btn btn-default ml-2" onclick="window.print()"><i
                                 class="fas fa-print"></i> Print</button>
                     </form>

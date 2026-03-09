@@ -33,6 +33,17 @@
                                         <option value="Online">Online / Marketplace</option>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Currency</label>
+                                    <select name="currency_id" class="form-control form-control-sm">
+                                        @foreach ($currencies as $curr)
+                                            <option value="{{ $curr->id }}"
+                                                {{ $curr->code == 'IDR' ? 'selected' : '' }}>
+                                                {{ $curr->code }} - {{ $curr->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">

@@ -26,6 +26,7 @@ class PurchaseOrder extends Model
         'tax_amount',
         'net_amount',
         'status',
+        'exchange_rate',
         'notes',
     ];
 
@@ -36,6 +37,7 @@ class PurchaseOrder extends Model
         'discount_amount' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'net_amount' => 'decimal:2',
+        'exchange_rate' => 'decimal:6',
     ];
 
     public function company()

@@ -12,10 +12,13 @@ use App\Models\Unit;
 use App\Models\TaxRate;
 use App\Models\PaymentTerm;
 use App\Models\Currency;
+use App\Models\ApprovalRequest;
+use App\Mail\ApprovalRequestMail;
 use App\Services\DocumentNumberService;
 use App\Traits\HasTaxCalculation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\Facades\DataTables;
 
 class PurchaseOrderController extends Controller
@@ -23,10 +26,12 @@ class PurchaseOrderController extends Controller
     use HasTaxCalculation;
 
     protected $docService;
+    protected $currencyService;
 
-    public function __construct(DocumentNumberService $docService)
+    public function __construct(DocumentNumberService $docService, \App\Services\CurrencyService $currencyService)
     {
         $this->docService = $docService;
+        $this->currencyService = $currencyService;
     }
 
     public function index(Request $request)
@@ -34,10 +39,14 @@ class PurchaseOrderController extends Controller
         if ($request->ajax()) {
             $pos = PurchaseOrder::with(['supplier', 'currency'])->select(['purchase_orders.*']);
             return DataTables::of($pos)
-                ->editColumn('order_date', function($row){ return $row->order_date->format('d/m/Y'); })
-                ->editColumn('net_amount', function($row){ return number_format($row->net_amount, 2); })
-                ->editColumn('status', function($row){
-                    $class = match($row->status) {
+                ->editColumn('order_date', function ($row) {
+                    return $row->order_date->format('d/m/Y');
+                })
+                ->editColumn('net_amount', function ($row) {
+                    return number_format($row->net_amount, 2);
+                })
+                ->editColumn('status', function ($row) {
+                    $class = match ($row->status) {
                         'Draft' => 'secondary',
                         'Pending' => 'warning',
                         'Approved' => 'info',
@@ -46,12 +55,12 @@ class PurchaseOrderController extends Controller
                         'Cancelled' => 'danger',
                         default => 'light'
                     };
-                    return '<span class="badge badge-'.$class.'">'.$row->status.'</span>';
+                    return '<span class="badge badge-' . $class . '">' . $row->status . '</span>';
                 })
                 ->addColumn('action', function ($row) {
                     return '
-                        <a href="'.route('purchase-orders.show', $row->id).'" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
-                        <a href="'.route('purchase-orders.edit', $row->id).'" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                        <a href="' . route('purchase-orders.show', $row->id) . '" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                        <a href="' . route('purchase-orders.edit', $row->id) . '" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
                     ';
                 })
                 ->rawColumns(['status', 'action'])
@@ -67,7 +76,7 @@ class PurchaseOrderController extends Controller
         $taxRates = TaxRate::where('is_active', true)->get();
         $paymentTerms = PaymentTerm::all();
         $currencies = Currency::all();
-        
+
         $nextNumber = $this->docService->generate('PO', auth()->user()->company_id, 'PUR');
 
         return view('procurement.purchase_orders.create', compact('suppliers', 'products', 'taxRates', 'paymentTerms', 'currencies', 'nextNumber'));
@@ -77,7 +86,7 @@ class PurchaseOrderController extends Controller
     {
         return DB::transaction(function () use ($request) {
             $poNumber = $this->docService->generate('PO', auth()->user()->company_id, 'PUR');
-            
+
             $po = PurchaseOrder::create([
                 'company_id' => auth()->user()->company_id,
                 'supplier_id' => $request->supplier_id,
@@ -88,6 +97,7 @@ class PurchaseOrderController extends Controller
                 'expected_delivery_date' => $request->expected_delivery_date,
                 'notes' => $request->notes,
                 'status' => 'Draft',
+                'exchange_rate' => $this->currencyService->getExchangeRate($request->currency_id, auth()->user()->company_id),
             ]);
 
             $totalAmount = 0;
@@ -127,6 +137,44 @@ class PurchaseOrderController extends Controller
     public function show(PurchaseOrder $purchaseOrder)
     {
         $purchaseOrder->load(['lines.product', 'lines.unit', 'lines.taxRate', 'supplier', 'currency', 'paymentTerm']);
-        return view('procurement.purchase_orders.show', compact('purchaseOrder'));
+        $approval = ApprovalRequest::where('approvable_type', PurchaseOrder::class)
+            ->where('approvable_id', $purchaseOrder->id)
+            ->latest()
+            ->first();
+
+        return view('procurement.purchase_orders.show', compact('purchaseOrder', 'approval'));
+    }
+
+    public function submit($id)
+    {
+        $po = PurchaseOrder::findOrFail($id);
+
+        if ($po->status !== 'Draft') {
+            return redirect()->back()->with('error', 'Only Draft orders can be submitted for approval.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $po->update(['status' => 'Pending']);
+
+            $approval = ApprovalRequest::create([
+                'company_id' => $po->company_id,
+                'approvable_type' => PurchaseOrder::class,
+                'approvable_id' => $po->id,
+                'requested_by' => auth()->id(),
+                'status' => 'Pending',
+            ]);
+
+            $admin = \App\Models\User::role('Admin')->first();
+            if ($admin && $admin->email) {
+                Mail::to($admin->email)->send(new ApprovalRequestMail($approval));
+            }
+
+            DB::commit();
+            return redirect()->route('purchase-orders.show', $po->id)->with('success', 'Purchase Order submitted for approval.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to submit for approval: ' . $e->getMessage());
+        }
     }
 }

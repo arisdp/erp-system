@@ -27,6 +27,8 @@ class SalesOrder extends Model
         'platform_fee',
         'platform_discount',
         'platform_voucher',
+        'currency_id',
+        'exchange_rate',
         'notes',
     ];
 
@@ -38,6 +40,7 @@ class SalesOrder extends Model
         'platform_fee' => 'decimal:2',
         'platform_discount' => 'decimal:2',
         'platform_voucher' => 'decimal:2',
+        'exchange_rate' => 'decimal:6',
     ];
 
     public function company()
@@ -53,6 +56,11 @@ class SalesOrder extends Model
     public function marketplace()
     {
         return $this->belongsTo(Marketplace::class);
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function lines()

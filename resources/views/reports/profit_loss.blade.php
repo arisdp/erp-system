@@ -20,6 +20,10 @@
                             <input type="date" name="end_date" class="form-control" value="{{ $endDate }}">
                         </div>
                         <button type="submit" class="btn btn-primary">Generate Report</button>
+                        <a href="{{ route('reports.profit-loss.print', ['start_date' => $startDate, 'end_date' => $endDate]) }}"
+                            target="_blank" class="btn btn-success ml-2">
+                            <i class="fas fa-file-pdf mr-1"></i> Export PDF
+                        </a>
                         <button type="button" class="btn btn-default ml-2" onclick="window.print()"><i
                                 class="fas fa-print"></i> Print</button>
                     </form>

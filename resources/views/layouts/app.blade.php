@@ -86,6 +86,42 @@
         table.dataTable.dtr-inline.collapsed>tbody>tr>td:first-child:before {
             background-color: #3f6791 !important;
         }
+
+        /* Mobile Utility Classes */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 0.5rem !important;
+            }
+
+            .card-body {
+                padding: 0.75rem !important;
+            }
+
+            .table-responsive-sm {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            .badge-xs {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            /* Hide non-essential columns on mobile if class is used */
+            .hide-mobile {
+                display: none !important;
+            }
+
+            .text-sm-mobile {
+                font-size: 0.75rem !important;
+            }
+        }
     </style>
 </head>
 

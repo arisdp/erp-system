@@ -17,6 +17,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ route('approvals.index') }}"
+                        class="nav-link {{ request()->routeIs('approvals.index') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-shield-alt text-warning"></i>
+                        <p>Approvals</p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ route('reports.profit-loss') }}"
                         class="nav-link {{ request()->is('reports/*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>

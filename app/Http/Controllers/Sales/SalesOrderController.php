@@ -9,10 +9,13 @@ use App\Models\SalesOrderLine;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\TaxRate;
+use App\Models\ApprovalRequest;
+use App\Mail\ApprovalRequestMail;
 use App\Services\DocumentNumberService;
 use App\Traits\HasTaxCalculation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\Facades\DataTables;
 
 class SalesOrderController extends Controller
@@ -20,10 +23,12 @@ class SalesOrderController extends Controller
     use HasTaxCalculation;
 
     protected $docService;
+    protected $currencyService;
 
-    public function __construct(DocumentNumberService $docService)
+    public function __construct(DocumentNumberService $docService, \App\Services\CurrencyService $currencyService)
     {
         $this->docService = $docService;
+        $this->currencyService = $currencyService;
     }
 
     public function index(Request $request)
@@ -91,6 +96,8 @@ class SalesOrderController extends Controller
                 'platform_fee' => $request->platform_fee ?? 0,
                 'platform_discount' => $request->platform_discount ?? 0,
                 'platform_voucher' => $request->platform_voucher ?? 0,
+                'currency_id' => $request->currency_id,
+                'exchange_rate' => $this->currencyService->getExchangeRate($request->currency_id, auth()->user()->company_id),
                 'notes' => $request->notes,
             ]);
 
@@ -133,6 +140,48 @@ class SalesOrderController extends Controller
     public function show(SalesOrder $salesOrder)
     {
         $salesOrder->load(['lines.product', 'lines.unit', 'lines.taxRate', 'customer', 'company']);
-        return view('sales.sales_orders.show', compact('salesOrder'));
+        $approval = ApprovalRequest::where('approvable_type', SalesOrder::class)
+            ->where('approvable_id', $salesOrder->id)
+            ->latest()
+            ->first();
+
+        return view('sales.sales_orders.show', compact('salesOrder', 'approval'));
+    }
+
+    public function submit($id)
+    {
+        $so = SalesOrder::findOrFail($id);
+
+        if ($so->status !== 'Draft') {
+            return redirect()->back()->with('error', 'Only Draft orders can be submitted for approval.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $so->update(['status' => 'Pending']);
+
+            $approval = ApprovalRequest::create([
+                'company_id' => $so->company_id,
+                'approvable_type' => SalesOrder::class,
+                'approvable_id' => $so->id,
+                'requested_by' => auth()->id(),
+                'status' => 'Pending',
+            ]);
+
+            // In a real scenario, you'd send this to specific approvers.
+            // For now, we'll try to send to anyone with an 'Admin' role or similar.
+            // Simplified: Send to the user who created the company or similar logic.
+            // Let's just send to a hardcoded email for now or the first admin found.
+            $admin = \App\Models\User::role('Admin')->first();
+            if ($admin && $admin->email) {
+                Mail::to($admin->email)->send(new ApprovalRequestMail($approval));
+            }
+
+            DB::commit();
+            return redirect()->route('sales-orders.show', $so->id)->with('success', 'Sales Order submitted for approval.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to submit for approval: ' . $e->getMessage());
+        }
     }
 }
