@@ -30,21 +30,27 @@ class GoodsReceiptController extends Controller
         if ($request->ajax()) {
             $grns = GoodsReceipt::with(['purchaseOrder', 'warehouse'])->select(['goods_receipts.*']);
             return DataTables::of($grns)
-                ->editColumn('received_date', function($row){ return $row->received_date->format('d/m/Y'); })
-                ->addColumn('po_number', function($row){ return $row->purchaseOrder->po_number ?? '-'; })
-                ->addColumn('warehouse_name', function($row){ return $row->warehouse->name ?? '-'; })
-                ->editColumn('status', function($row){
-                    $class = match($row->status) {
+                ->editColumn('received_date', function ($row) {
+                    return $row->received_date->format('d/m/Y');
+                })
+                ->addColumn('po_number', function ($row) {
+                    return $row->purchaseOrder->po_number ?? '-';
+                })
+                ->addColumn('warehouse_name', function ($row) {
+                    return $row->warehouse->name ?? '-';
+                })
+                ->editColumn('status', function ($row) {
+                    $class = match ($row->status) {
                         'Draft' => 'secondary',
                         'Received' => 'success',
                         'Cancelled' => 'danger',
                         default => 'light'
                     };
-                    return '<span class="badge badge-'.$class.'">'.$row->status.'</span>';
+                    return '<span class="badge badge-' . $class . '">' . $row->status . '</span>';
                 })
                 ->addColumn('action', function ($row) {
                     return '
-                        <a href="'.route('goods-receipts.show', $row->id).'" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                        <a href="' . route('goods-receipts.show', $row->id) . '" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
                     ';
                 })
                 ->rawColumns(['status', 'action'])
@@ -72,7 +78,7 @@ class GoodsReceiptController extends Controller
     {
         return DB::transaction(function () use ($request) {
             $grnNumber = $this->docService->generate('GRN', auth()->user()->company_id, 'GRN');
-            
+
             $grn = GoodsReceipt::create([
                 'company_id' => auth()->user()->company_id,
                 'purchase_order_id' => $request->purchase_order_id,
@@ -87,6 +93,11 @@ class GoodsReceiptController extends Controller
             foreach ($request->lines as $lineData) {
                 if ($lineData['quantity_received'] <= 0) continue;
 
+                $product = \App\Models\Product::find($lineData['product_id']);
+                $poNumber = $request->purchase_order_id ? PurchaseOrder::find($request->purchase_order_id)->po_number : 'NA';
+                $dateStr = now()->format('Ymd');
+                $generatedBatch = strtoupper($poNumber . '-' . $dateStr . '-' . ($product->sku ?? 'UNIT'));
+
                 $grnLine = GoodsReceiptLine::create([
                     'goods_receipt_id' => $grn->id,
                     'purchase_order_line_id' => $lineData['purchase_order_line_id'] ?? null,
@@ -94,7 +105,7 @@ class GoodsReceiptController extends Controller
                     'unit_id' => $lineData['unit_id'],
                     'quantity_ordered' => $lineData['quantity_ordered'] ?? 0,
                     'quantity_received' => $lineData['quantity_received'],
-                    'batch_number' => $lineData['batch_number'] ?? null,
+                    'batch_number' => $lineData['batch_number'] ?? $generatedBatch,
                     'expiry_date' => $lineData['expiry_date'] ?? null,
                 ]);
 
@@ -133,5 +144,11 @@ class GoodsReceiptController extends Controller
     {
         $goodsReceipt->load(['lines.product', 'lines.unit', 'purchaseOrder', 'warehouse', 'company']);
         return view('procurement.goods_receipts.show', compact('goodsReceipt'));
+    }
+
+    public function printQr(GoodsReceipt $goodsReceipt)
+    {
+        $goodsReceipt->load(['lines.product', 'company']);
+        return view('procurement.goods_receipts.print_qr', compact('goodsReceipt'));
     }
 }

@@ -17,6 +17,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
+                        <th>Type</th>
                         <th>Currency</th>
                         <th width="100" class="text-center">Action</th>
                     </tr>
@@ -63,6 +64,14 @@
                                     <label>Phone Number</label>
                                     <input type="text" name="phone" id="phone" class="form-control"
                                         placeholder="08123456789">
+                                </div>
+                                <div class="form-group">
+                                    <label>Customer Type <span class="text-danger">*</span></label>
+                                    <select name="type" id="type" class="form-control" required>
+                                        <option value="Offline">Offline</option>
+                                        <option value="Online">Online</option>
+                                        <option value="Both">Both</option>
+                                    </select>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
@@ -130,6 +139,14 @@
                         data: 'phone'
                     },
                     {
+                        data: 'type',
+                        render: function(data) {
+                            let badge = data === 'Online' ? 'info' : (data === 'Both' ? 'primary' :
+                                'secondary');
+                            return '<span class="badge badge-' + badge + '">' + data + '</span>';
+                        }
+                    },
+                    {
                         data: 'currency.code'
                     },
                     {
@@ -183,6 +200,7 @@
                     $('#email').val(res.email);
                     $('#phone').val(res.phone);
                     $('#address').val(res.address);
+                    $('#type').val(res.type);
                     $('#currency_id').val(res.currency_id);
                     $('#payment_term_id').val(res.payment_term_id);
                     $('#customerModal').modal('show');

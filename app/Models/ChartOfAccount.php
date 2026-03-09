@@ -40,6 +40,11 @@ class ChartOfAccount extends Model
         return $this->belongsTo(AccountGroup::class, 'account_group_id');
     }
 
+    public function accountGroup()
+    {
+        return $this->group();
+    }
+
     public function parent()
     {
         return $this->belongsTo(ChartOfAccount::class, 'parent_id');

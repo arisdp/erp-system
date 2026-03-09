@@ -36,13 +36,21 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label class="font-weight-bold">Customer <span class="text-danger">*</span></label>
-                                    <select name="customer_id" class="form-control form-control-sm select2" required>
-                                        <option value="">Select Customer</option>
-                                        @foreach ($customers as $customer)
-                                            <option value="{{ $customer->id }}">{{ $customer->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="input-group">
+                                        <select name="customer_id" id="customerId"
+                                            class="form-control form-control-sm select2" required>
+                                            <option value="">Select Customer</option>
+                                            @foreach ($customers as $customer)
+                                                <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                                id="btnQuickAddCustomer" title="Quick Add Customer">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div id="marketplaceGroup" style="display:none">
                                     <div class="form-group">
@@ -192,6 +200,79 @@
             </td>
         </tr>
     </table>
+    <div class="modal fade" id="quickCustomerModal" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="quickCustomerForm" class="text-xs">
+                    @csrf
+                    <div class="modal-header bg-primary text-white p-2">
+                        <h6 class="modal-title font-weight-bold">Quick Create Customer</h6>
+                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body p-3">
+                        <div class="row">
+                            <div class="col-md-6 border-right">
+                                <div class="form-group mb-2">
+                                    <label>Code <span class="text-danger">*</span></label>
+                                    <input type="text" name="code" class="form-control form-control-sm"
+                                        placeholder="CUST-NEW" required>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label>Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" class="form-control form-control-sm"
+                                        placeholder="Customer Name" required>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label>Type <span class="text-danger">*</span></label>
+                                    <select name="type" class="form-control form-control-sm" required>
+                                        <option value="Offline">Offline</option>
+                                        <option value="Online" selected>Online</option>
+                                        <option value="Both">Both</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label>Phone</label>
+                                    <input type="text" name="phone" class="form-control form-control-sm">
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group mb-2">
+                                            <label>Currency</label>
+                                            <select name="currency_id" class="form-control form-control-sm">
+                                                @foreach ($currencies as $curr)
+                                                    <option value="{{ $curr->id }}">{{ $curr->code }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group mb-2">
+                                            <label>Term</label>
+                                            <select name="payment_term_id" class="form-control form-control-sm">
+                                                @foreach ($paymentTerms as $term)
+                                                    <option value="{{ $term->id }}">{{ $term->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0">
+                                    <label>Address</label>
+                                    <textarea name="address" class="form-control form-control-sm" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer p-2">
+                        <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-xs">Save Customer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -214,6 +295,31 @@
             });
 
             $('.online-calc').on('input', calculateTotals);
+
+            $('#btnQuickAddCustomer').click(function() {
+                $('#quickCustomerModal').modal('show');
+            });
+
+            $('#quickCustomerForm').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{{ route('customers.store') }}",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function(res) {
+                        $('#quickCustomerModal').modal('hide');
+                        // Find the new customer in the list (we need ID and Name)
+                        // For simplicity, we assume the response includes the created object or we fetch list
+                        // Let's reload the customers dropdown via AJAX or just add manual option
+                        Swal.fire('Success', 'Customer created. Please select from list.',
+                            'success');
+                        location.reload(); // Quickest way to refresh master data for now
+                    },
+                    error: function(err) {
+                        Swal.fire('Error', 'Failed to create customer', 'error');
+                    }
+                });
+            });
         });
 
         function addRow() {

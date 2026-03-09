@@ -16,31 +16,31 @@ class FoundationSeeder extends Seeder
     public function run(): void
     {
         // Create Company
-        $company = Company::create([
-            'code' => 'CMP-001',
-            'name' => 'Demo Company',
-            'email' => 'demo@company.com',
-        ]);
+        $company = Company::updateOrCreate(
+            ['code' => 'CMP-001'],
+            ['name' => 'Demo Company', 'email' => 'demo@company.com']
+        );
 
         // Create Admin User
-        $user = User::create([
-            'company_id' => $company->id,
-            'name' => 'Super Admin',
-            'email' => 'admin@erp.test',
-            'password' => Hash::make('password'),
-        ]);
+        $user = User::updateOrCreate(
+            ['email' => 'admin@erp.test'],
+            [
+                'company_id' => $company->id,
+                'name' => 'Super Admin',
+                'password' => Hash::make('password'),
+            ]
+        );
 
-        // Attach user to company
-        $user->companies()->attach($company->id);
+        // Attach user to company (using sync to avoid duplicates in pivot)
+        $user->companies()->sync([$company->id]);
 
         // Create Role
-        $role = Role::create([
-            'company_id' => $company->id,
-            'name' => 'SuperAdmin',
-            'guard_name' => 'web',
-        ]);
+        $role = Role::updateOrCreate(
+            ['company_id' => $company->id, 'name' => 'SuperAdmin'],
+            ['guard_name' => 'web']
+        );
 
         // Attach role to user
-        $user->roles()->attach($role->id);
+        $user->roles()->sync([$role->id]);
     }
 }

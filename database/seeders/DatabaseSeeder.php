@@ -20,6 +20,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AccountTypeSeeder::class,
             FoundationSeeder::class,
+            MasterFinanceSeeder::class,
+            MarketplaceSeeder::class,
+            DemoDataSeeder::class,
         ]);
     }
 }

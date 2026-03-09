@@ -9,6 +9,10 @@
                 <div class="card-header bg-dark d-flex justify-content-between align-items-center">
                     <h3 class="card-title font-weight-bold mb-0">GRN: {{ $goodsReceipt->grn_number }}</h3>
                     <div>
+                        <a href="{{ route('goods-receipts.print-qr', $goodsReceipt->id) }}" target="_blank"
+                            class="btn btn-info btn-xs mr-2">
+                            <i class="fas fa-qrcode mr-1"></i> Print QR Codes
+                        </a>
                         <a href="{{ route('purchase-invoices.create', ['goods_receipt_id' => $goodsReceipt->id]) }}"
                             class="btn btn-primary btn-xs mr-2">
                             <i class="fas fa-file-invoice mr-1"></i> Create Invoice

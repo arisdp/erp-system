@@ -44,6 +44,7 @@ class CustomerController extends Controller
             'address' => 'nullable|string',
             'payment_term_id' => 'nullable|exists:payment_terms,id',
             'currency_id' => 'nullable|exists:currencies,id',
+            'type' => 'nullable|string|in:Offline,Online,Both',
         ]);
 
         Customer::create($validated);
@@ -65,6 +66,7 @@ class CustomerController extends Controller
             'address' => 'nullable|string',
             'payment_term_id' => 'nullable|exists:payment_terms,id',
             'currency_id' => 'nullable|exists:currencies,id',
+            'type' => 'nullable|string|in:Offline,Online,Both',
         ]);
 
         $customer->update($validated);

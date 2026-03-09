@@ -31,11 +31,17 @@ class SalesOrderController extends Controller
         if ($request->ajax()) {
             $sos = SalesOrder::with(['customer'])->select(['sales_orders.*']);
             return DataTables::of($sos)
-                ->editColumn('order_date', function($row){ return $row->order_date->format('d/m/Y'); })
-                ->editColumn('net_amount', function($row){ return number_format($row->net_amount, 2); })
-                ->addColumn('customer_name', function($row){ return $row->customer->name ?? '-'; })
-                ->editColumn('status', function($row){
-                    $class = match($row->status) {
+                ->editColumn('order_date', function ($row) {
+                    return $row->order_date->format('d/m/Y');
+                })
+                ->editColumn('net_amount', function ($row) {
+                    return number_format($row->net_amount, 2);
+                })
+                ->addColumn('customer_name', function ($row) {
+                    return $row->customer->name ?? '-';
+                })
+                ->editColumn('status', function ($row) {
+                    $class = match ($row->status) {
                         'Draft' => 'secondary',
                         'Approved' => 'info',
                         'Delivered' => 'success',
@@ -43,11 +49,11 @@ class SalesOrderController extends Controller
                         'Cancelled' => 'danger',
                         default => 'light'
                     };
-                    return '<span class="badge badge-'.$class.'">'.$row->status.'</span>';
+                    return '<span class="badge badge-' . $class . '">' . $row->status . '</span>';
                 })
                 ->addColumn('action', function ($row) {
                     return '
-                        <a href="'.route('sales-orders.show', $row->id).'" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                        <a href="' . route('sales-orders.show', $row->id) . '" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
                     ';
                 })
                 ->rawColumns(['status', 'action'])
@@ -62,16 +68,18 @@ class SalesOrderController extends Controller
         $products = Product::where('is_active', true)->with(['unit', 'taxRate'])->get();
         $taxRates = TaxRate::where('is_active', true)->get();
         $marketplaces = \App\Models\Marketplace::where('is_active', true)->get();
+        $paymentTerms = \App\Models\PaymentTerm::all();
+        $currencies = \App\Models\Currency::all();
         $nextNumber = $this->docService->generate('SO', auth()->user()->company_id, 'SO');
 
-        return view('sales.sales_orders.create', compact('customers', 'products', 'taxRates', 'marketplaces', 'nextNumber'));
+        return view('sales.sales_orders.create', compact('customers', 'products', 'taxRates', 'marketplaces', 'nextNumber', 'paymentTerms', 'currencies'));
     }
 
     public function store(StoreSalesOrderRequest $request)
     {
         return DB::transaction(function () use ($request) {
             $soNumber = $this->docService->generate('SO', auth()->user()->company_id, 'SO');
-            
+
             $so = SalesOrder::create([
                 'company_id' => auth()->user()->company_id,
                 'customer_id' => $request->customer_id,
