@@ -15,6 +15,7 @@ class PaymentTerm extends Model
 
     protected $fillable = [
         'company_id',
+        'code',
         'name',
         'days',
     ];

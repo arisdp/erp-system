@@ -7,14 +7,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Traits\Auditable;
+use App\Core\Traits\MultiTenant;
 
 class Currency extends Model
 {
-    use HasFactory, HasUuids, Auditable, SoftDeletes;
+    use HasFactory, HasUuids, MultiTenant, Auditable, SoftDeletes;
 
     protected $fillable = [
+        'company_id',
         'code',
         'name',
+        'symbol',
         'exchange_rate',
         'is_base',
     ];
