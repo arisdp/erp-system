@@ -8,11 +8,11 @@
             <form action="{{ route('sales-orders.store') }}" method="POST" id="soForm">
                 @csrf
                 <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-dark">
-                        <h3 class="card-title font-weight-bold"><i class="fas fa-info-circle mr-2"></i> SO Header Information
+                    <div class="card-header bg-dark text-white">
+                        <h3 class="card-title font-weight-bold mb-0"><i class="fas fa-info-circle mr-2 text-primary"></i> SO Header Information
                         </h3>
                     </div>
-                    <div class="card-body text-sm">
+                    <div class="card-body text-sm bg-light rounded-bottom">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -216,11 +216,11 @@
             <div class="modal-content">
                 <form id="quickCustomerForm" class="text-xs">
                     @csrf
-                    <div class="modal-header bg-primary text-white p-2">
-                        <h6 class="modal-title font-weight-bold">Quick Create Customer</h6>
+                    <div class="modal-header bg-dark text-white p-3 border-0">
+                        <h6 class="modal-title font-weight-bold uppercase"><i class="fas fa-user-plus mr-2 text-primary"></i> Quick Create Customer</h6>
                         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                     </div>
-                    <div class="modal-body p-3">
+                    <div class="modal-body p-4 bg-light">
                         <div class="row">
                             <div class="col-md-6 border-right">
                                 <div class="form-group mb-2">

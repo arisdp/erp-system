@@ -7,11 +7,11 @@
         @csrf
         <div class="row">
             <div class="col-md-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-dark">
-                        <h3 class="card-title"><i class="fas fa-file-invoice mr-2"></i> PO Header: {{ $nextNumber }}</h3>
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h3 class="card-title font-weight-bold mb-0"><i class="fas fa-file-invoice mr-2 text-primary"></i> PO Header: {{ $nextNumber }}</h3>
                     </div>
-                    <div class="card-body text-sm font-weight-light">
+                    <div class="card-body text-sm font-weight-light bg-light rounded-bottom">
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
@@ -67,9 +67,9 @@
             </div>
 
             <div class="col-md-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-secondary py-2">
-                        <h3 class="card-title text-sm"><i class="fas fa-list mr-2"></i> Order Lines</h3>
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-secondary text-white py-2">
+                        <h3 class="card-title text-sm font-weight-bold mb-0"><i class="fas fa-list mr-2"></i> Order Lines</h3>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-sm table-bordered mb-0" id="linesTable">
@@ -131,7 +131,7 @@
         <td>
             <select name="lines[{index}][product_id]" class="form-control form-control-sm select-product" required>
                 <option value="">Search Product...</option>
-                @foreach($products as $p)
+                @foreach ($products as $p)
                     <option value="{{ $p->id }}" data-price="{{ $p->purchase_price }}" data-tax="{{ $p->tax_rate_id }}" data-unit="{{ $p->unit->name }}">{{ $p->name }} ({{ $p->sku }})</option>
                 @endforeach
             </select>

@@ -5,13 +5,13 @@
 @section('content')
     <div class="row">
         <div class="col-12">
-            <div class="card card-outline card-info">
-                <div class="card-header">
-                    <h3 class="card-title">Asset Grouping & Depreciation Setup</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#categoryModal"
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h3 class="card-title font-weight-bold mb-0 text-dark"><i class="fas fa-tags mr-2 text-info"></i> Asset Categories</h3>
+                    <div class="card-tools ml-auto">
+                        <button type="button" class="btn btn-sm btn-info font-weight-bold shadow-sm" data-toggle="modal" data-target="#categoryModal"
                             id="addNewBtn">
-                            <i class="fas fa-plus"></i> Add Category
+                            <i class="fas fa-plus mr-1"></i> Add Category
                         </button>
                     </div>
                 </div>

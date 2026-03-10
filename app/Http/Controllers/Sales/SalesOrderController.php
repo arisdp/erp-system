@@ -172,7 +172,7 @@ class SalesOrderController extends Controller
             // For now, we'll try to send to anyone with an 'Admin' role or similar.
             // Simplified: Send to the user who created the company or similar logic.
             // Let's just send to a hardcoded email for now or the first admin found.
-            $admin = \App\Models\User::role('Admin')->first();
+            $admin = \App\Models\User::role('SuperAdmin')->first();
             if ($admin && $admin->email) {
                 Mail::to($admin->email)->send(new ApprovalRequestMail($approval));
             }

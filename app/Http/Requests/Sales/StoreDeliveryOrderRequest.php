@@ -20,6 +20,8 @@ class StoreDeliveryOrderRequest extends FormRequest
             'sales_order_id' => 'required|exists:sales_orders,id',
             'warehouse_id' => 'required|exists:warehouses,id',
             'delivery_date' => 'required|date',
+            'shipping_method' => 'nullable|string|max:255',
+            'tracking_number' => 'nullable|string|max:255',
             'lines' => 'required|array|min:1',
             'lines.*.product_id' => 'required|exists:products,id',
             'lines.*.quantity_shipped' => 'required|numeric|min:0.000001',

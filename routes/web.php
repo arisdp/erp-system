@@ -91,6 +91,7 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'sales'], function () {
         Route::post('sales-orders/{id}/submit', [SalesOrderController::class, 'submit'])->name('sales-orders.submit');
         Route::resource('sales-orders', SalesOrderController::class);
+        Route::post('delivery-orders/{deliveryOrder}/confirm-delivery', [\App\Http\Controllers\Sales\DeliveryOrderController::class, 'confirmDelivery'])->name('delivery-orders.confirm-delivery');
         Route::resource('delivery-orders', \App\Http\Controllers\Sales\DeliveryOrderController::class);
         Route::resource('sales-invoices', \App\Http\Controllers\Sales\SalesInvoiceController::class);
     });

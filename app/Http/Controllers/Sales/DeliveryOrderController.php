@@ -37,7 +37,8 @@ class DeliveryOrderController extends Controller
                 ->editColumn('status', function($row){
                     $class = match($row->status) {
                         'Draft' => 'secondary',
-                        'Shipped' => 'success',
+                        'Shipped' => 'info',
+                        'Received' => 'success',
                         'Cancelled' => 'danger',
                         default => 'light'
                     };
@@ -81,6 +82,8 @@ class DeliveryOrderController extends Controller
                 'delivery_date' => $request->delivery_date,
                 'status' => 'Shipped', // Changed to shipped when processed
                 'shipped_by' => $request->shipped_by,
+                'shipping_method' => $request->shipping_method,
+                'tracking_number' => $request->tracking_number,
                 'notes' => $request->notes,
             ]);
 
@@ -130,5 +133,21 @@ class DeliveryOrderController extends Controller
     {
         $deliveryOrder->load(['lines.product', 'lines.unit', 'salesOrder.customer', 'warehouse', 'company']);
         return view('sales.delivery_orders.show', compact('deliveryOrder'));
+    }
+
+    public function confirmDelivery(Request $request, DeliveryOrder $deliveryOrder)
+    {
+        $request->validate([
+            'received_by' => 'required|string|max:255',
+            'received_at' => 'required|date',
+        ]);
+
+        $deliveryOrder->update([
+            'status' => 'Received',
+            'received_by' => $request->received_by,
+            'received_at' => $request->received_at,
+        ]);
+
+        return redirect()->back()->with('success', 'Delivery confirmed as received by ' . $request->received_by);
     }
 }

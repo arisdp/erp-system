@@ -12,16 +12,20 @@
                 </div>
                 <div class="card-body text-sm">
                     <div class="row mb-5">
-                        <div class="col-sm-4 border-right">
+                         <div class="col-sm-4 border-right">
                             <h6 class="text-muted font-weight-bold mb-3 uppercase small">Shipment Info</h6>
                             <table class="table table-sm table-borderless">
                                 <tr>
-                                    <td width="120">Shipment Date</td>
+                                    <td width="130">Shipment Date</td>
                                     <td>: <strong>{{ $deliveryOrder->delivery_date->format('d M Y') }}</strong></td>
                                 </tr>
                                 <tr>
-                                    <td>Shipped By</td>
-                                    <td>: <strong>{{ $deliveryOrder->shipped_by ?: '-' }}</strong></td>
+                                    <td>Method</td>
+                                    <td>: <span class="badge badge-outline-dark">{{ $deliveryOrder->shipping_method ?: 'Not set' }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Tracking #</td>
+                                    <td>: <strong>{{ $deliveryOrder->tracking_number ?: '-' }}</strong></td>
                                 </tr>
                                 <tr>
                                     <td>Warehouse</td>
@@ -29,21 +33,25 @@
                                 </tr>
                                 <tr>
                                     <td>SO Ref</td>
-                                    <td>: <a
-                                            href="{{ route('sales-orders.show', $deliveryOrder->sales_order_id) }}"><strong>{{ $deliveryOrder->salesOrder->so_number }}</strong></a>
-                                    </td>
+                                    <td>: <a href="{{ route('sales-orders.show', $deliveryOrder->sales_order_id) }}"><strong>{{ $deliveryOrder->salesOrder->so_number }}</strong></a></td>
                                 </tr>
                             </table>
                         </div>
                         <div class="col-sm-4 border-right">
-                            <h6 class="text-muted font-weight-bold mb-3 uppercase small">Customer Info</h6>
-                            <address>
-                                <strong
-                                    class="text-lg text-primary">{{ $deliveryOrder->salesOrder->customer->name }}</strong><br>
+                            <h6 class="text-muted font-weight-bold mb-3 uppercase small">Customer & Receiver Info</h6>
+                            <address class="mb-3">
+                                <strong class="text-lg text-primary">{{ $deliveryOrder->salesOrder->customer->name }}</strong><br>
                                 {{ $deliveryOrder->salesOrder->customer->address ?: 'No address' }}<br>
-                                <i class="fas fa-phone mr-1 text-muted"></i>
-                                {{ $deliveryOrder->salesOrder->customer->phone ?: '-' }}
+                                <i class="fas fa-phone mr-1 text-muted"></i> {{ $deliveryOrder->salesOrder->customer->phone ?: '-' }}
                             </address>
+                            
+                            @if ($deliveryOrder->status == 'Received')
+                                <div class="p-2 border rounded bg-success-light">
+                                    <label class="small font-weight-bold mb-0 text-success"><i class="fas fa-check-circle mr-1"></i> Received Info:</label>
+                                    <p class="mb-0 small"><strong>By:</strong> {{ $deliveryOrder->received_by }}</p>
+                                    <p class="mb-0 small"><strong>On:</strong> {{ $deliveryOrder->received_at->format('d M Y H:i') }}</p>
+                                </div>
+                            @endif
                         </div>
                         <div class="col-sm-4">
                             <h6 class="text-muted font-weight-bold mb-3 uppercase small">Internal Memo</h6>
@@ -93,12 +101,51 @@
                             class="fas fa-arrow-left mr-1"></i> Back to List</a>
                     <button onclick="window.print()" class="btn btn-outline-dark btn-sm ml-2 px-4 font-weight-bold"><i
                             class="fas fa-print mr-1"></i> Print Delivery Note</button>
-                    @if ($deliveryOrder->status == 'Draft')
-                        <button class="btn btn-success btn-sm ml-2 px-4 font-weight-bold shadow-sm"><i
-                                class="fas fa-truck mr-1"></i> Confirm Dispatch</button>
+                    
+                    @if ($deliveryOrder->status == 'Shipped')
+                        <button type="button" class="btn btn-success btn-sm ml-2 px-4 font-weight-bold shadow-sm" 
+                                data-toggle="modal" data-target="#receiveModal">
+                            <i class="fas fa-check-double mr-1"></i> Mark as Received
+                        </button>
                     @endif
                 </div>
             </div>
         </div>
     </div>
+
+    @if ($deliveryOrder->status == 'Shipped')
+    <!-- Receive Modal -->
+    <div class="modal fade" id="receiveModal" tabindex="-1" role="dialog" aria-labelledby="receiveModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form action="{{ route('delivery-orders.confirm-delivery', $deliveryOrder->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header bg-success text-white text-sm">
+                        <h5 class="modal-title font-weight-bold" id="receiveModalLabel"><i class="fas fa-handshake mr-2"></i> Confirm Cargo Receipt</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-sm">
+                        <p class="mb-3">Please confirm that the items have been successfully delivered to the customer.</p>
+                        <div class="form-group border-left border-success pl-2">
+                            <label class="font-weight-bold small uppercase text-muted">Receiver Name <span class="text-danger">*</span></label>
+                            <input type="text" name="received_by" class="form-control form-control-sm" 
+                                   placeholder="Full name of person who received the goods" required>
+                        </div>
+                        <div class="form-group border-left border-success pl-2">
+                            <label class="font-weight-bold small uppercase text-muted">Date & Time Received <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="received_at" class="form-control form-control-sm" 
+                                   value="{{ date('Y-m-d\TH:i') }}" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light py-2">
+                        <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success btn-sm px-4 font-weight-bold shadow-sm">Confirm & Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
 @endsection

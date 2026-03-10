@@ -5,16 +5,16 @@
 @section('content')
     <div class="row">
         <div class="col-12">
-            <div class="card card-outline card-success">
-                <div class="card-header">
-                    <h3 class="card-title">Fixed Asset Register</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-sm btn-info mr-1" id="runDepreciationBtn">
-                            <i class="fas fa-sync"></i> Run Depreciation
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h3 class="card-title font-weight-bold mb-0 text-dark"><i class="fas fa-laptop mr-2 text-success"></i> Fixed Assets Register</h3>
+                    <div class="card-tools ml-auto">
+                        <button type="button" class="btn btn-sm btn-outline-info mr-2 shadow-sm" id="runDepreciationBtn">
+                            <i class="fas fa-sync mr-1"></i> Run Depreciation
                         </button>
-                        <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#assetModal"
+                        <button type="button" class="btn btn-sm btn-success font-weight-bold shadow-sm" data-toggle="modal" data-target="#assetModal"
                             id="addNewBtn">
-                            <i class="fas fa-plus"></i> Register Asset
+                            <i class="fas fa-plus mr-1"></i> Register Asset
                         </button>
                     </div>
                 </div>

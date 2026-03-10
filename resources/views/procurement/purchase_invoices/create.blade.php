@@ -7,11 +7,11 @@
         <div class="col-md-11">
             <form action="{{ route('purchase-invoices.store') }}" method="POST">
                 @csrf
-                <div class="card shadow-sm">
-                    <div class="card-header bg-dark">
-                        <h3 class="card-title"><i class="fas fa-file-invoice mr-2"></i> Invoice Header</h3>
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h3 class="card-title font-weight-bold"><i class="fas fa-file-invoice mr-2 text-primary"></i> Invoice Header</h3>
                     </div>
-                    <div class="card-body text-sm">
+                    <div class="card-body text-sm bg-light rounded-bottom">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -72,9 +72,9 @@
                     </div>
                 </div>
 
-                <div class="card shadow-sm mt-3">
-                    <div class="card-header bg-secondary">
-                        <h3 class="card-title"><i class="fas fa-list mr-2"></i> Invoice Lines</h3>
+                <div class="card shadow-sm border-0 mt-3">
+                    <div class="card-header bg-secondary text-white">
+                        <h3 class="card-title font-weight-bold"><i class="fas fa-list mr-2"></i> Invoice Lines</h3>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-sm table-bordered mb-0">

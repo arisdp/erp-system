@@ -165,7 +165,7 @@ class PurchaseOrderController extends Controller
                 'status' => 'Pending',
             ]);
 
-            $admin = \App\Models\User::role('Admin')->first();
+            $admin = \App\Models\User::role('SuperAdmin')->first();
             if ($admin && $admin->email) {
                 Mail::to($admin->email)->send(new ApprovalRequestMail($approval));
             }

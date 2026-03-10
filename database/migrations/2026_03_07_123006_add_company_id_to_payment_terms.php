@@ -26,7 +26,9 @@ return new class extends Migration
     {
         if (Schema::hasColumn('payment_terms', 'company_id')) {
             Schema::table('payment_terms', function (Blueprint $table) {
-                $table->dropForeign(['company_id']);
+                if (DB::getDriverName() !== 'sqlite') {
+                    $table->dropForeign(['company_id']);
+                }
                 $table->dropColumn('company_id');
             });
         }

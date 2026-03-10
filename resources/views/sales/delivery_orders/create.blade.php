@@ -8,10 +8,10 @@
             <form action="{{ route('delivery-orders.store') }}" method="POST">
                 @csrf
                 <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-dark">
-                        <h3 class="card-title font-weight-bold"><i class="fas fa-truck-loading mr-2"></i> Delivery Header</h3>
+                    <div class="card-header bg-dark text-white">
+                        <h3 class="card-title font-weight-bold mb-0"><i class="fas fa-truck-loading mr-2 text-primary"></i> Delivery Header</h3>
                     </div>
-                    <div class="card-body text-sm">
+                    <div class="card-body text-sm bg-light rounded-bottom">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -49,15 +49,30 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label class="font-weight-bold">Shipped By</label>
-                                    <input type="text" name="shipped_by" class="form-control form-control-sm"
-                                        placeholder="Driver name / Courier">
+                                    <label class="font-weight-bold">Shipping Method <span class="text-danger">*</span></label>
+                                    <select name="shipping_method" class="form-control form-control-sm select2" required>
+                                        <option value="">Select Method</option>
+                                        <option value="Internal Vehicle">Kendaraan Kantor (Internal)</option>
+                                        <option value="JNE">JNE</option>
+                                        <option value="J&T">J&T</option>
+                                        <option value="Sicepat">Sicepat</option>
+                                        <option value="POS Indonesia">POS Indonesia</option>
+                                        <option value="GoSend/GrabExpress">GoSend / GrabExpress</option>
+                                        <option value="Other">Lainnya (Tulis di Notes)</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
+                                    <label class="font-weight-bold">Tracking Number / Driver Info</label>
+                                    <input type="text" name="tracking_number" class="form-control form-control-sm"
+                                        placeholder="AWB No / Driver Reg No">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
                                     <label class="font-weight-bold">Notes</label>
-                                    <textarea name="notes" class="form-control form-control-sm" rows="1"></textarea>
+                                    <textarea name="notes" class="form-control form-control-sm" rows="4" placeholder="Additional shipping instructions or notes..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -65,7 +80,7 @@
                 </div>
 
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-secondary">
+                    <div class="card-header bg-secondary text-white">
                         <h3 class="card-title font-weight-bold"><i class="fas fa-boxes mr-2"></i> Shipped Items</h3>
                     </div>
                     <div class="card-body p-0">

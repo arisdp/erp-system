@@ -29,12 +29,14 @@
 @section('content')
     <form id="journalForm">
         @csrf
-        <div class="row">
-            <div class="col-md-9">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-dark">
-                        <h3 class="card-title"><i class="fas fa-plus-circle mr-2"></i> New Journal Entry</h3>
-                    </div>
+        <div class="row justify-content-center">
+            <div class="col-md-11">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-dark text-white">
+                                <h3 class="card-title font-weight-bold"><i class="fas fa-plus-circle mr-2"></i> New Journal Entry</h3>
+                            </div>
                     <div class="card-body p-0">
                         <table class="table table-bordered mb-0" id="linesTable">
                             <thead class="thead-light text-xs uppercase">
@@ -67,9 +69,9 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm">
-                    <div class="card-body text-sm">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body text-sm bg-light rounded">
                         <div class="form-group">
                             <label>Journal Date</label>
                             <input type="date" name="journal_date" class="form-control form-control-sm"
@@ -98,6 +100,7 @@
                         </button>
                         <a href="{{ route('journals.index') }}" class="btn btn-default btn-block btn-sm mt-2">Cancel</a>
                     </div>
+                </div>
                 </div>
             </div>
         </div>

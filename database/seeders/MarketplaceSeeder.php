@@ -19,7 +19,7 @@ class MarketplaceSeeder extends Seeder
             ['name' => 'Shopee', 'company_id' => $company->id],
             ['name' => 'Tokopedia', 'company_id' => $company->id],
             ['name' => 'TikTok Shop', 'company_id' => $company->id],
-            ['name' => 'Lazada', 'company_id' => $customer_id ?? $company->id],
+            ['name' => 'Lazada', 'company_id' => $company->id],
         ];
 
         foreach ($marketplaces as $m) {

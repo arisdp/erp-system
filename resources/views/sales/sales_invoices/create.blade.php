@@ -9,17 +9,17 @@
                 @csrf
                 @if ($sourceType == 'SO')
                     <input type="hidden" name="sales_order_id" value="{{ $sourceData->id }}">
-                @elseif($sourceType == 'DO')
+                @elseif ($sourceType == 'DO')
                     <input type="hidden" name="delivery_order_id" value="{{ $sourceData->id }}">
                 @endif
 
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-dark py-3">
-                        <h3 class="card-title font-weight-bold mb-0">New Invoice
+                    <div class="card-header bg-dark text-white py-3">
+                        <h3 class="card-title font-weight-bold mb-0"><i class="fas fa-file-invoice-dollar mr-2 text-success"></i> New Invoice
                             {{ $sourceType ? "(From $sourceType: " . ($sourceType == 'SO' ? $sourceData->so_number : $sourceData->do_number) . ')' : '' }}
                         </h3>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body bg-light rounded-bottom">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">

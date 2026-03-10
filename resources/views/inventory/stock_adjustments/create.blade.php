@@ -3,15 +3,15 @@
 @section('title', 'New Stock Adjustment')
 
 @section('content')
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card card-primary card-outline">
-                <div class="card-header">
-                    <h3 class="card-title">Create Stock Adjustment ({{ $nextNumber }})</h3>
+    <div class="row justify-content-center">
+        <div class="col-md-11">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="card-title font-weight-bold"><i class="fas fa-adjust mr-2 text-warning"></i> Create Stock Adjustment ({{ $nextNumber }})</h3>
                 </div>
                 <form action="{{ route('stock-adjustments.store') }}" method="POST">
                     @csrf
-                    <div class="card-body">
+                    <div class="card-body bg-light rounded-bottom">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">

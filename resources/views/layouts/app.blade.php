@@ -208,6 +208,38 @@
 
     @stack('scripts')
 
+    <script>
+        $(function() {
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: {!! json_encode(session('success')) !!},
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: {!! json_encode(session('error')) !!},
+                    confirmButtonText: 'OK'
+                });
+            @endif
+
+            @if (session('info'))
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Information',
+                    text: {!! json_encode(session('info')) !!},
+                    timer: 3000
+                });
+            @endif
+        });
+    </script>
+
 </body>
 
 </html>

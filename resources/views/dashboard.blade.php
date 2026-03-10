@@ -123,25 +123,27 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($recentActivities as $act)
-                                <tr>
-                                    <td>
-                                        <small class="text-muted d-block">{{ $act->ref }}</small>
-                                        {{ $act->type }}
-                                    </td>
-                                    <td>
-                                        <span
-                                            class="badge badge-{{ $act->status == 'confirmed' ? 'success' : 'warning' }}">
-                                            {{ ucfirst($act->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="text-right"><strong>{{ number_format($act->total_amount, 0) }}</strong></td>
-                                </tr>
-                            @empty
+                            @if(count($recentActivities) > 0)
+                                @foreach ($recentActivities as $act)
+                                    <tr>
+                                        <td>
+                                            <small class="text-muted d-block">{{ $act->ref }}</small>
+                                            {{ $act->type }}
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="badge badge-{{ $act->status == 'confirmed' ? 'success' : 'warning' }}">
+                                                {{ ucfirst($act->status) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-right"><strong>{{ number_format($act->total_amount, 0) }}</strong></td>
+                                    </tr>
+                                @endforeach
+                            @else
                                 <tr>
                                     <td colspan="3" class="text-center">No recent activities</td>
                                 </tr>
-                            @endforelse
+                            @endif
                         </tbody>
                     </table>
                 </div>

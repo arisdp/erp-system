@@ -3,15 +3,15 @@
 @section('title', 'New Stock Transfer')
 
 @section('content')
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card card-primary card-outline">
-                <div class="card-header">
-                    <h3 class="card-title">Create Stock Transfer ({{ $nextNumber }})</h3>
+    <div class="row justify-content-center">
+        <div class="col-md-11">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="card-title font-weight-bold"><i class="fas fa-exchange-alt mr-2 text-info"></i> Create Stock Transfer ({{ $nextNumber }})</h3>
                 </div>
                 <form action="{{ route('stock-transfers.store') }}" method="POST">
                     @csrf
-                    <div class="card-body">
+                    <div class="card-body bg-light rounded-bottom">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -26,7 +27,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('sales_orders', function (Blueprint $table) {
-            $table->dropForeign(['marketplace_id']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['marketplace_id']);
+            }
             $table->dropColumn(['marketplace_id', 'transaction_type', 'platform_fee', 'platform_discount', 'platform_voucher']);
         });
     }

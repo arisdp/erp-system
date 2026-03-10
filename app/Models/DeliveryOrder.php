@@ -21,11 +21,16 @@ class DeliveryOrder extends Model
         'delivery_date',
         'status',
         'shipped_by',
+        'shipping_method',
+        'tracking_number',
+        'received_at',
+        'received_by',
         'notes',
     ];
 
     protected $casts = [
         'delivery_date' => 'date',
+        'received_at' => 'datetime',
     ];
 
     public function company()

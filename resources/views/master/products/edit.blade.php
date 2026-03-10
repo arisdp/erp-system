@@ -8,12 +8,11 @@
             <form action="{{ route('products.update', $product->id) }}" method="POST">
                 @csrf
                 @method('PUT')
-                <div class="card shadow-sm">
-                    <div class="card-header bg-warning">
-                        <h3 class="card-title text-dark font-weight-bold"><i class="fas fa-edit mr-2"></i> Edit Product
-                            Information</h3>
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white">
+                        <h3 class="card-title font-weight-bold"><i class="fas fa-edit mr-2 text-warning"></i> Edit Product Information</h3>
                     </div>
-                    <div class="card-body text-sm">
+                    <div class="card-body text-sm bg-light rounded-bottom">
                         <div class="row">
                             <div class="col-md-6 border-right">
                                 <div class="form-group">

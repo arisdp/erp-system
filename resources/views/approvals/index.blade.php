@@ -6,8 +6,9 @@
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-dark">
-                    <h3 class="card-title font-weight-bold">Pending Approvals</h3>
+                <div class="card-header bg-white py-3">
+                    <h3 class="card-title font-weight-bold mb-0 text-dark"><i
+                            class="fas fa-check-shield mr-2 text-warning"></i> Pending Approvals</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -23,23 +24,40 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($approvals as $approval)
-                                    <tr>
-                                        <td>{{ $approval->created_at->format('d/m/Y H:i') }}</td>
-                                        <td>{{ str_replace('App\\Models\\', '', $approval->approvable_type) }}</td>
-                                        <td>
-                                            <strong>{{ $approval->approvable->so_number ?? ($approval->approvable->po_number ?? ($approval->approvable->number ?? 'N/A')) }}</strong>
-                                        </td>
-                                        <td>{{ $approval->requestedBy->name }}</td>
-                                        <td>
-                                            <span
-                                                class="badge badge-{{ $approval->status == 'Approved' ? 'success' : ($approval->status == 'Rejected' ? 'danger' : 'warning') }}">
-                                                {{ $approval->status }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            @if ($approval->status == 'Pending')
-                                                <div class="d-flex">
+                                @if(count($approvals) > 0)
+                                    @foreach ($approvals as $approval)
+                                        <tr>
+                                            <td>{{ $approval->created_at ? $approval->created_at->format('d/m/Y H:i') : 'N/A' }}
+                                            </td>
+                                            <td>{{ str_replace('App\\Models\\', '', $approval->approvable_type) }}</td>
+                                            <td>
+                                                <strong>{{ $approval->approvable->so_number ?? ($approval->approvable->po_number ?? ($approval->approvable->number ?? 'N/A')) }}</strong>
+                                            </td>
+                                            <td>{{ $approval->requestedBy->name ?? 'N/A' }}</td>
+                                            <td>
+                                                <span
+                                                    class="badge badge-{{ $approval->status == 'Pending' ? 'warning' : ($approval->status == 'Approved' ? 'success' : 'danger') }}">
+                                                    {{ $approval->status }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $showRoute = '#';
+                                                    if ($approval->approvable_type == 'App\\Models\\Sales\\SalesOrder') {
+                                                        $showRoute = route('sales-orders.show', $approval->approvable_id);
+                                                    } elseif (
+                                                        $approval->approvable_type ==
+                                                        'App\\Models\\Procurement\\PurchaseOrder'
+                                                    ) {
+                                                        $showRoute = route('purchase-orders.show', $approval->approvable_id);
+                                                    }
+                                                @endphp
+                                                <a href="{{ $showRoute }}" class="btn btn-xs btn-info mr-2 px-3"
+                                                    title="View Details">
+                                                    <i class="fas fa-eye mr-1"></i> View
+                                                </a>
+
+                                                @if ($approval->status == 'Pending')
                                                     <form action="{{ route('approvals.approve', $approval->id) }}"
                                                         method="POST" class="mr-2">
                                                         @csrf
@@ -54,19 +72,19 @@
                                                             <i class="fas fa-times mr-1"></i> Reject
                                                         </button>
                                                     </form>
-                                                </div>
-                                            @else
-                                                <span class="text-muted small">Processed by
-                                                    {{ $approval->approvedBy->name ?? 'SYSTEM' }}</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
+                                                @else
+                                                    <span class="text-muted small italic">Processed by
+                                                        {{ $approval->processedBy->name ?? 'System' }}</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
                                     <tr>
-                                        <td colspan="6" class="text-center py-4 text-muted">No pending approval requests
-                                            found.</td>
+                                        <td colspan="6" class="text-center py-4 text-muted italic">No pending approval
+                                            requests</td>
                                     </tr>
-                                @endforelse
+                                @endif
                             </tbody>
                         </table>
                     </div>
